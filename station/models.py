@@ -1,5 +1,6 @@
 import datetime
 from django.db import models
+from pybitcoin import BitcoinPrivateKey
 
 # Create your models here.
 
@@ -8,11 +9,11 @@ class Song(models.Model):
     title = models.TextField()
     duration = models.DurationField()
     explicit = models.BooleanField(default=False)
-    genre = models.TextField()
-    subgenre= models.TextField()
+    genre = models.TextField(blank=True)
+    subgenre= models.TextField(blank=True)
     recorded_date = models.DateField()
 
-    url = models.TextField()
+    mp3 = models.FileField(null=True, blank=True)
 
     def last_played(self):
         """
@@ -37,17 +38,23 @@ class Song(models.Model):
 
 class Artist(models.Model):
     name = models.TextField()
-    bitcoin_address = models.TextField()
+    private_key_hex = models.CharField(max_length=50, blank=True)
+    address = models.CharField(max_length=50, blank=True)
 
     def __unicode__(self):
         return self.name
 
-    def address(self):
-        if not self.bitcoin_address:
-            self.bitcoin_address = generate_address()
+    def generate_address(self):
+        if not self.address:
+            priv = BitcoinPrivateKey()
+            self.private_key_hex = priv.to_hex()
+            self.address = priv.public_key().address()
             self.save()
 
-        return self.bitcoin_address
+        return self.address
+
+    def private_key_wif(self):
+        return BitcoinPrivateKey(self.private_key_hex).to_wif()
 
 class StationPlay(models.Model):
     ordinal = models.IntegerField(primary_key=True)
