@@ -32,9 +32,16 @@ class Song(models.Model):
         Is this song eligible to be the next song in the station?
         Determine this by comparing it with the
         """
-        last_artists = StationPlay.objects.order_by('-ordinal')[:5]
+
+        title_repeat = int(Song.objects.count() / 2)
+        artist_repeat = int(Artist.objects.count() / 2)
+
+        last_artists = StationPlay.objects.order_by('-ordinal')[:artist_repeat]
+        plays_last_title = StationPlay.objects.order_by('-ordinal')[:title_repeat]
 
         if self.artist in [x.song.artist for x in last_artists]:
+            return False
+        if self.title in [x.song.title for x in plays_last_title]:
             return False
         return True
 
@@ -70,8 +77,8 @@ class StationPlay(models.Model):
 
     @classmethod
     def generate_next(cls, last_end):
-        while True:
-            random_song = Song.objects.filter(mp3__isnull=False).order_by("?")[0]
+        for x in xrange(Song.objects.count()):
+            random_song = Song.objects.exclude(mp3='').order_by("?")[0]
             if random_song.is_valid_next():
                 chosen_song = random_song
                 start = last_end
@@ -81,6 +88,7 @@ class StationPlay(models.Model):
                     start_time=start,
                     end_time=end,
                 )
+        raise Exception("No eligible songs")
 
     def as_dict(self):
         return {
