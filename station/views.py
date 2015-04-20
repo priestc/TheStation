@@ -1,9 +1,30 @@
-from django.shortcuts import render
+import datetime
+import pytz
 
-# Create your views here.
+from django.shortcuts import render
+from django.http import JsonResponse
+
+from .models import StationPlay
 
 def current_and_next_song(request):
-    current = StationPlay.objects.latest()
+    now = datetime.datetime.now(pytz.utc)
+
+    try:
+        current_play = StationPlay.objects.get(start_time__lt=now, end_time__gt=now)
+    except StationPlay.DoesNotExist:
+        # no current_play == station went dead due to no listeners
+        current_play = StationPlay.generate_next(now)
+
+    try:
+        next_play = StationPlay.objects.get(start_time__gt=now)
+    except StationPlay.DoesNotExist:
+        # first hit after a new generated song, generate the next song.
+        next_play = StationPlay.generate_next(current_play.end_time)
+
+    return JsonResponse({
+        'current_song': current_play.as_dict(),
+        'next_song': next_play.as_dict(),
+    })
 
 def player(request):
     return render(request, "home.html", {})

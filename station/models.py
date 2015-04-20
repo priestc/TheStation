@@ -1,8 +1,11 @@
 import datetime
+
 from django.db import models
 from pybitcoin import BitcoinPrivateKey
 
 # Create your models here.
+
+song_padding = 200
 
 class Song(models.Model):
     artist = models.ForeignKey('station.Artist')
@@ -15,6 +18,9 @@ class Song(models.Model):
 
     mp3 = models.FileField(null=True, blank=True)
 
+    def __unicode__(self):
+        return "%s - %s" % (self.artist.name, self.title)
+
     def last_played(self):
         """
         When the last time his song was played
@@ -26,18 +32,15 @@ class Song(models.Model):
         Is this song eligible to be the next song in the station?
         Determine this by comparing it with the
         """
-        last_twenty = SongPlay.objects.order_by('-ordinal')[:20]
-        last_five = last_twenty[:5]
+        last_artists = StationPlay.objects.order_by('-ordinal')[:5]
 
-        if self.artist in [x.artist for x in last_20]:
-            return False
-        if self.genre in [x.genre for x in last_five]:
+        if self.artist in [x.song.artist for x in last_artists]:
             return False
         return True
 
 
 class Artist(models.Model):
-    name = models.TextField()
+    name = models.TextField(unique=True)
     private_key_hex = models.CharField(max_length=50, blank=True)
     address = models.CharField(max_length=50, blank=True)
 
@@ -59,19 +62,33 @@ class Artist(models.Model):
 class StationPlay(models.Model):
     ordinal = models.IntegerField(primary_key=True)
     song = models.ForeignKey('station.Song')
-    playtime = models.DateTimeField(default=datetime.datetime.now)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
 
-    class Meta:
-        get_latest_by = 'played'
+    def __unicode__(self):
+        return "%s - %s - %s" % (self.start_time, self.song, self.end_time)
 
     @classmethod
-    def generate_next(cls):
+    def generate_next(cls, last_end):
         while True:
-            random_song = Song.objects.order_by("?")[0]
+            random_song = Song.objects.filter(mp3__isnull=False).order_by("?")[0]
             if random_song.is_valid_next():
-                last_song = cls.objects.latest()
-                last_start = last_song.playtime
+                chosen_song = random_song
+                start = last_end
+                end = start + chosen_song.duration + datetime.timedelta(seconds=2)
                 return cls.objects.create(
-                    song=random_song,
-                    playtime=last_start + random_song.duration
+                    song=chosen_song,
+                    start_time=start,
+                    end_time=end,
                 )
+
+    def as_dict(self):
+        return {
+            'artist': self.song.artist.name,
+            'bitcoin': self.song.artist.address,
+            'title': self.song.title,
+            'start_time': self.start_time,
+            'end_time': self.end_time,
+            'duration': self.song.duration.total_seconds(),
+            'url': self.song.mp3.url
+        }

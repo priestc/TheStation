@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>The Station</h1>
+
+Next Song:
+<div id="next_song"></div>
+
+Currently playing:
+<div id="currently_playing"></div>
+
+<div id="player_container"><audio id="player" controls></audio></div>
+
+Play history:
+<div id="last_played_container"></div>
+
+<script type="text/javascript" src="{{ STATIC_URL }}admin/js/jquery.js"></script>
+
+<script>
+    function switch_currently_playing(new_song, skip_ahead) {
+        if(skip_ahead) {
+            console.log("skipping ahead", skip_ahead);
+        }
+        var player = $("#player");
+
+        player.attr('src', new_song.url);
+        $("#currently_playing").html("<h2>" + new_song.title + "</h2><h3>" + new_song.artist + "</h3>");
+        player.get(0).play();
+    }
+
+    function fetch_next_track() {
+        // hit the backend to get the next song.
+        $.ajax({
+            url: "/current_and_next_song",
+            type: "get",
+            complete: function(response) {
+                console.log("fetching next song");
+                response = response.responseJSON;
+                next_song = response.next_song
+                current_song = response.current_song
+
+                $("#next_song").html("<span class='artist'>" + next_song.artist + "</span> - <span class='title'>" + next_song.title + "</span>");
+
+
+                console.log("current:", current_song);
+                console.log("next:", next_song);
+
+                // anywhere between 25% and 75% of the play time.
+                seconds_to_fetch_next = next_song.duration * (Math.random() * 0.5 + 0.25);
+                console.log("after current song ends, wait " + seconds_to_fetch_next + " seconds until next fetch");
+
+                if(!$("#player").attr('src')) {
+                    // streaming first started
+                    var seconds_skip_ahead = ((new Date()).getTime() - (new Date(current_song.start_time))) / 1000;
+                    switch_currently_playing(current_song, seconds_skip_ahead);
+
+                    // when to change to the next track
+                    var next_start_date = new Date(next_song.start_time);
+                    var switch_track_miliseconds = next_start_date.getTime() - (new Date()).getTime();
+
+                    console.log("switching to next track in " + switch_track_miliseconds / 1000 + "seconds");
+                    setTimeout(function() {
+                        switch_currently_playing(next_song)
+                    }, switch_track_miliseconds);
+
+                    var next_fetch_miliseconds = switch_track_miliseconds + (seconds_to_fetch_next * 1000);
+                    setTimeout(fetch_next_track, next_fetch_miliseconds);
+                    console.log("will fetch next song in " + next_fetch_miliseconds / 1000 + " seconds");
+                    return
+                }
+
+                // when this track is supposed to start
+                var play_date = new Date(next_song.start_time);
+
+                var miliseconds_from_now = play_date.getTime() - (new Date()).getTime();
+
+                // schedule the next track change.
+                setTimeout(function() {
+                    switch_currently_playing(next_song)
+                }, miliseconds_from_now);
+
+                // schedule the next song fetch
+                setTimeout(fetch_next_track, seconds_to_fetch_next * 1000);
+                console.log("next song is " + next_song.duration + " seconds long");
+                console.log("will fetch next song in " + seconds_to_fetch_next + " seconds");
+            }
+        });
+    }
+    // get the streaming process going.
+    fetch_next_track();
+</script>
+
+{% endblock %}
