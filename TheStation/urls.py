@@ -11,5 +11,6 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^current_and_next_song', views.current_and_next_song),
     url(r'^$', views.player),
+    url(r'^upload', views.upload),
     (r'^mp3/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 )

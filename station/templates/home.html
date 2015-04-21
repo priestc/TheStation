@@ -10,6 +10,10 @@
 </style>
 <h1>The Station</h1>
 
+<button id="mute">Mute</button><button id="unmute" style="display: none">Un-mute</button><br>
+
+<button>Stop</button><br>
+
 Next Song:
 <div id="next_song"></div>
 <br>
@@ -28,6 +32,19 @@ Play history:
     $('#player').on('timeupdate', function() {
         $('#seekbar').attr("value", this.currentTime / this.duration);
     });
+
+    $("#mute").click(function() {
+        $(this).hide();
+        $('#player').get(0).volume = 0.01;
+        $("#unmute").show();
+    });
+
+    $("#unmute").click(function() {
+        $(this).hide();
+        $('#player').get(0).volume = 1.0;
+        $("#mute").show();
+    })
+
     function switch_currently_playing(new_song, skip_ahead) {
         if(skip_ahead) {
             console.log("skipping ahead", skip_ahead);
@@ -39,7 +56,7 @@ Play history:
         }
         var player = $("#player");
 
-        player.attr('src', "http://localhost:8000" + new_song.url);
+        player.attr('src', "http://localhost:8001" + new_song.url);
         $("#currently_playing").html("<span class='artist'>" + new_song.artist + "</span> - <span class='title'>" + new_song.title + "</span>");
         player.get(0).play();
     }

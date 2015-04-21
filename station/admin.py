@@ -19,11 +19,15 @@ class ArtistAdmin(admin.ModelAdmin):
     #readonly_fields = ('private_key_wif', )
 
 class SongAdmin(admin.ModelAdmin):
-    list_display = ('title', 'artist', 'genre', 'subgenre', 'has_mp3')
+    list_display = ('title', 'artist', 'year', 'collection', 'genre', 'subgenre', 'has_mp3')
+
+    def year(self, obj):
+        return obj.recorded_date.strftime("%Y")
 
     def has_mp3(self, obj):
         return bool(obj.mp3)
     has_mp3.boolean = True
+
 
 class StationPlayAdmin(admin.ModelAdmin):
     list_display = ('ordinal', 'playing', 'starttime', 'endtime2', 'song', 'duration')

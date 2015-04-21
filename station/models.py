@@ -12,11 +12,15 @@ class Song(models.Model):
     title = models.TextField()
     duration = models.DurationField()
     explicit = models.BooleanField(default=False)
+    collection = models.TextField()
     genre = models.TextField(blank=True)
     subgenre= models.TextField(blank=True)
     recorded_date = models.DateField()
 
     mp3 = models.FileField(null=True, blank=True)
+
+    class Meta:
+        unique_together = (("title", "artist"),)
 
     def __unicode__(self):
         return "%s - %s" % (self.artist.name, self.title)
@@ -25,7 +29,7 @@ class Song(models.Model):
         """
         When the last time his song was played
         """
-        return self.stationplay_set.latest().played
+        return self.stationplay_set.latest().start_time
 
     def is_valid_next(self):
         """
