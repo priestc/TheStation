@@ -29,6 +29,24 @@ Play history:
 <script type="text/javascript" src="{{ STATIC_URL }}admin/js/jquery.js"></script>
 
 <script>
+    var all_voices = window.speechSynthesis.getVoices();
+    function make_bumper(words) {
+        $('#player').animate({volume: 0.1}, 500);
+        var msg = new SpeechSynthesisUtterance(words);
+        var this_hour = (new Date()).getHours();
+        msg.voice = all_voices[this_hour];
+        msg.onend = function() {
+            // after speech is over, bring volume back
+            $('#player').animate({volume: 1.0}, 500);
+        }
+        window.speechSynthesis.speak(msg);
+    }
+
+    function make_autotip(song) {
+        $("html").trigger( "microtip.songEnd", song.tips );
+    }
+
+
     $('#player').on('timeupdate', function() {
         $('#seekbar').attr("value", this.currentTime / this.duration);
     });
@@ -46,17 +64,16 @@ Play history:
     })
 
     function switch_currently_playing(new_song, skip_ahead) {
+        var player = $("#player");
+        player.attr('src', new_song.url);
+
         if(skip_ahead) {
             console.log("skipping ahead", skip_ahead);
-            $('#player').on('timeupdate', function() {
-                $('#seekbar').attr("value", this.currentTime / this.duration);
-            });
+            player.get(0).currentTime = skip_ahead;
         } else {
-            $("#next_song").html("");
+            $("#next_song").html("&nbsp;");
         }
-        var player = $("#player");
 
-        player.attr('src', "http://localhost:8001" + new_song.url);
         $("#currently_playing").html("<span class='artist'>" + new_song.artist + "</span> - <span class='title'>" + new_song.title + "</span>");
         player.get(0).play();
     }
