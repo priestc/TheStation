@@ -12,6 +12,9 @@ class Feature(models.Model):
     artist = models.ForeignKey('station.Artist', related_name='featuring_artists')
     ratio = models.FloatField()
 
+    def __unicode__(self):
+        return "feat. %s" % self.artist.name
+
 class Song(models.Model):
     artist = models.ForeignKey('station.Artist', related_name='songs')
     title = models.TextField()
@@ -24,6 +27,12 @@ class Song(models.Model):
     featuring = models.ManyToManyField('station.Artist', through='station.Feature', blank=True)
 
     mp3 = models.FileField(null=True, blank=True)
+
+    class Meta:
+        unique_together = (("title", "artist"),)
+
+    def __unicode__(self):
+        return "%s - %s" % (self.artist.name, self.title)
 
     def get_tips(self):
         """
@@ -52,16 +61,10 @@ class Song(models.Model):
             'address': self.artist.address,
         }]
 
-    class Meta:
-        unique_together = (("title", "artist"),)
-
-    def __unicode__(self):
-        return "%s - %s" % (self.artist.name, self.title)
-
     @property
     def last_played(self):
         """
-        When the last time his song was played
+        When the last time his song was played.
         """
         return self.stationplay_set.latest('ordinal').start_time
 

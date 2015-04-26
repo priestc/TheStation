@@ -19,7 +19,7 @@ class ArtistAdmin(admin.ModelAdmin):
     #readonly_fields = ('private_key_wif', )
 
 class SongAdmin(admin.ModelAdmin):
-    list_display = ('title', 'artist', 'year', 'collection', 'genre', 'subgenre', 'has_mp3', 'last_played_ago')
+    list_display = ('title', 'artist', 'year', 'collection', 'genre', 'subgenre', 'has_mp3', 'last_played_ago', 'times_played')
 
     def year(self, obj):
         return obj.recorded_date.strftime("%Y")
@@ -27,6 +27,9 @@ class SongAdmin(admin.ModelAdmin):
     def has_mp3(self, obj):
         return bool(obj.mp3)
     has_mp3.boolean = True
+
+    def times_played(self, obj):
+        return obj.stationplay_set.count()
 
 
 class StationPlayAdmin(admin.ModelAdmin):
