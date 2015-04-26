@@ -112,7 +112,7 @@ class Artist(models.Model):
         return BitcoinPrivateKey(self.private_key_hex).to_wif()
 
 class StationPlay(models.Model):
-    ordinal = models.IntegerField(primary_key=True)
+    ordinal = models.AutoField(primary_key=True)
     song = models.ForeignKey('station.Song')
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
