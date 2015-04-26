@@ -93,7 +93,7 @@ class Song(models.Model):
 
 class Artist(models.Model):
     name = models.TextField(unique=True)
-    private_key_hex = models.CharField(max_length=50, blank=True)
+    private_key_hex = models.CharField(max_length=64, blank=True)
     address = models.CharField(max_length=50, blank=True)
 
     def __unicode__(self):

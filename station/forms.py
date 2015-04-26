@@ -13,7 +13,6 @@ class NewSongForm(forms.ModelForm):
         exclude = ('featuring', )
         widgets = {
             'collection': forms.TextInput,
-            #'artist': forms.TextInput,
             'genre': forms.TextInput,
             'subgenre': forms.TextInput,
             'title': forms.TextInput,

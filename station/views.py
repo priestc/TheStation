@@ -4,6 +4,7 @@ import pytz
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.contrib.auth.decorators import login_required
 
 from .models import StationPlay, Artist, Song
 from .forms import NewSongForm
@@ -32,6 +33,7 @@ def current_and_next_song(request):
 def player(request):
     return render(request, "home.html", {})
 
+@login_required
 def upload(request):
     form = NewSongForm()
     if request.POST:
