@@ -19,7 +19,7 @@ class ArtistAdmin(admin.ModelAdmin):
     #readonly_fields = ('private_key_wif', )
 
 class SongAdmin(admin.ModelAdmin):
-    list_display = ('title', 'artist', 'year', 'collection', 'genre', 'subgenre', 'has_mp3')
+    list_display = ('title', 'artist', 'year', 'collection', 'genre', 'subgenre', 'has_mp3', 'last_played_ago')
 
     def year(self, obj):
         return obj.recorded_date.strftime("%Y")
@@ -30,7 +30,7 @@ class SongAdmin(admin.ModelAdmin):
 
 
 class StationPlayAdmin(admin.ModelAdmin):
-    list_display = ('ordinal', 'playing', 'starttime', 'endtime2', 'song', 'duration')
+    list_display = ('ordinal', 'playing', 'starttime', 'endtime2', 'song', 'duration', 'played_ago')
 
     def duration(self, obj):
         return obj.song.duration.total_seconds()
@@ -44,6 +44,9 @@ class StationPlayAdmin(admin.ModelAdmin):
     def playing(self, obj):
         return obj.start_time < datetime.datetime.now(pytz.utc) < obj.end_time
     playing.boolean = True
+
+    def played_ago(self, obj):
+        return obj.song.last_played_ago
 
 admin.site.register(StationPlay, StationPlayAdmin)
 admin.site.register(Song, SongAdmin)

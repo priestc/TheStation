@@ -29,7 +29,7 @@
                 console.log("MP3 tags!!!", result);
                 $("#id_title").val(result.title);
                 $("#id_artist").val(result.artist[0])
-
+                $("#id_collection").val(result.album);
                 $("#id_recorded_date").val(result.year + "-01-01")
                 $("#id_duration").val(to_ms(result.duration));
             });

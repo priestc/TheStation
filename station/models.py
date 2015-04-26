@@ -1,5 +1,5 @@
 import datetime
-
+import pytz
 from django.db import models
 from pybitcoin import BitcoinPrivateKey
 
@@ -26,7 +26,31 @@ class Song(models.Model):
     mp3 = models.FileField(null=True, blank=True)
 
     def get_tips(self):
-        pass
+        """
+        Always returns a list of dicts, each dict containing all the data needed
+        to make the microtip meta tags, or microtip audio tag.
+        """
+        if self.featuring:
+            feature_tips = []
+            all_feature = self.featuring
+            share = 0.5 / len(all_feature)
+            for feature in all_feature:
+                feature_tips.append({
+                    'recipient': feature.name,
+                    'ratio': feature.ratio or share,
+                    'address': feature.address,
+                })
+            return feature_tips + [{
+                'recipient': self.name,
+                'ratio': 0.5,
+                'address': self.address,
+            }]
+
+        return [{
+            'recipient': self.name,
+            'ratio': 1.0,
+            'address': self.address,
+        }]
 
     class Meta:
         unique_together = (("title", "artist"),)
@@ -34,11 +58,16 @@ class Song(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.artist.name, self.title)
 
+    @property
     def last_played(self):
         """
         When the last time his song was played
         """
-        return self.stationplay_set.latest().start_time
+        return self.stationplay_set.latest('ordinal').start_time
+
+    @property
+    def last_played_ago(self):
+        return datetime.datetime.now(pytz.utc) - self.last_played
 
     def is_valid_next(self):
         """
@@ -47,7 +76,7 @@ class Song(models.Model):
         """
 
         title_repeat = int(Song.objects.count() / 2)
-        artist_repeat = int(Artist.objects.count() / 2)
+        artist_repeat = int(Artist.objects.count() / 3)
 
         last_artists = StationPlay.objects.order_by('-ordinal')[:artist_repeat]
         plays_last_title = StationPlay.objects.order_by('-ordinal')[:title_repeat]
@@ -100,7 +129,7 @@ class StationPlay(models.Model):
                     song=chosen_song,
                     start_time=start,
                     end_time=end,
-                )
+                ), x
         raise Exception("No eligible songs")
 
     def as_dict(self):

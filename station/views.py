@@ -18,13 +18,14 @@ def current_and_next_song(request):
         current_play = StationPlay.objects.get(start_time__lt=now, end_time__gt=now)
     except StationPlay.DoesNotExist:
         # no current_play == station went dead due to no listeners
-        current_play = StationPlay.generate_next(now)
+        current_play, tries = StationPlay.generate_next(now)
 
     try:
         next_play = StationPlay.objects.get(start_time__gt=now)
     except StationPlay.DoesNotExist:
         # first hit after a new generated song, generate the next song.
-        next_play = StationPlay.generate_next(current_play.end_time)
+        next_play, tries = StationPlay.generate_next(current_play.end_time)
+        print "Generated new track, tried this many times:", tries
 
     return JsonResponse({
         'current_song': current_play.as_dict(),
