@@ -1,10 +1,39 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <style>
+        input[type=text] {width: 20em}
+    </style>
+    <script src="{{ STATIC_URL }}musicmetadata.js"></script>
+    <h1>Add new song to TheStation</h1>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <input type="text" name="year" placeholder="year"><br>
-        <input type="file" id="file" name="file"><br>
+        <table>
+        {{ form.as_table }}
+        </table>
         <input type="submit">
     </form>
+    <script>
+        function to_ms(seconds) {
+            // Convert seconds to MM:SS
+            m = Math.floor(seconds / 60);
+            s = seconds % 60;
+            if(s < 10) {
+                s = "0" + s
+            }
+            return m + ":" + s;
+        }
+
+        $("#id_mp3").change(function(event) {
+            var parser = musicmetadata($(this)[0].files[0], { duration: true }, function(err, result) {
+                console.log("MP3 tags!!!", result);
+                $("#id_title").val(result.title);
+                $("#id_artist").val(result.artist[0])
+
+                $("#id_recorded_date").val(result.year + "-01-01")
+                $("#id_duration").val(to_ms(result.duration));
+            });
+        });
+
+    </script>
 {% endblock %}

@@ -42,11 +42,6 @@ Play history:
         window.speechSynthesis.speak(msg);
     }
 
-    function make_autotip(song) {
-        $("html").trigger( "microtip.songEnd", song.tips );
-    }
-
-
     $('#player').on('timeupdate', function() {
         $('#seekbar').attr("value", this.currentTime / this.duration);
     });
@@ -66,10 +61,11 @@ Play history:
     function switch_currently_playing(new_song, skip_ahead) {
         var player = $("#player");
         player.attr('src', new_song.url);
+        player.data('microtips', new_song.tips);
 
         if(skip_ahead) {
             console.log("skipping ahead", skip_ahead);
-            player.get(0).currentTime = skip_ahead;
+            //player.get(0).currentTime = skip_ahead;
         } else {
             $("#next_song").html("&nbsp;");
         }

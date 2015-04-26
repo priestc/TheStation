@@ -4,9 +4,12 @@ import pytz
 import eyed3
 
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from django.forms.models import inlineformset_factory
 
 from .models import StationPlay, Artist, Song
+from .forms import NewSongForm, UploadMP3Form
 
 def current_and_next_song(request):
     now = datetime.datetime.now(pytz.utc)
@@ -32,30 +35,15 @@ def player(request):
     return render(request, "home.html", {})
 
 def upload(request):
+    form = NewSongForm()
     if request.POST:
-        f = request.FILES['file']
-        path = f.temporary_file_path()
-        mp3 = eyed3.load(path)
+        form = NewSongForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            url = reverse("upload")
+            return HttpResponseRedirect(url)
 
-        artist, c = Artist.objects.get_or_create(
-            name=mp3.tag.artist
-        )
+    return render(request, "upload.html", locals())
 
-        try:
-            year = mp3.tag.getBestDate().year
-        except:
-            year = year=int(request.POST['year'])
-
-        date = datetime.datetime(year=year, day=1, month=1)
-
-        Song.objects.create(
-            artist=artist,
-            title=mp3.tag.title,
-            collection=mp3.tag.album,
-            duration=datetime.timedelta(seconds=mp3.info.time_secs),
-            genre=mp3.tag.genre or "",
-            recorded_date=date,
-            mp3=f,
-        )
-
-    return render(request, "upload.html", {})
+def example(request):
+    return render(request, "example.html", locals())

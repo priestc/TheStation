@@ -7,17 +7,26 @@ from pybitcoin import BitcoinPrivateKey
 
 song_padding = 200
 
+class Feature(models.Model):
+    song = models.ForeignKey('station.Song', related_name='featured_songs')
+    artist = models.ForeignKey('station.Artist', related_name='featuring_artists')
+    ratio = models.FloatField()
+
 class Song(models.Model):
-    artist = models.ForeignKey('station.Artist')
+    artist = models.ForeignKey('station.Artist', related_name='songs')
     title = models.TextField()
     duration = models.DurationField()
     explicit = models.BooleanField(default=False)
-    collection = models.TextField()
+    collection = models.TextField(blank=True)
     genre = models.TextField(blank=True)
     subgenre= models.TextField(blank=True)
     recorded_date = models.DateField()
+    featuring = models.ManyToManyField('station.Artist', through='station.Feature', blank=True)
 
     mp3 = models.FileField(null=True, blank=True)
+
+    def get_tips(self):
+        pass
 
     class Meta:
         unique_together = (("title", "artist"),)
@@ -97,7 +106,7 @@ class StationPlay(models.Model):
     def as_dict(self):
         return {
             'artist': self.song.artist.name,
-            'bitcoin': self.song.artist.address,
+            'tips': self.song.get_tips(),
             'title': self.song.title,
             'start_time': self.start_time,
             'end_time': self.end_time,
