@@ -13,6 +13,5 @@ urlpatterns = [
     url(r'^current_and_next_song', views.current_and_next_song),
     url(r'^$', views.player, name="home"),
     url(r'^upload', views.upload, name="upload"),
-    url(r'^example', views.example, name="example"),
     url(r'^mp3/(?P<path>.*)$', django.views.static.serve, {'document_root': settings.MEDIA_ROOT}),
 ]

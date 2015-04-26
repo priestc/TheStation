@@ -1,15 +1,12 @@
 import datetime
 import pytz
 
-import eyed3
-
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.forms.models import inlineformset_factory
 
 from .models import StationPlay, Artist, Song
-from .forms import NewSongForm, UploadMP3Form
+from .forms import NewSongForm
 
 def current_and_next_song(request):
     now = datetime.datetime.now(pytz.utc)
@@ -45,6 +42,3 @@ def upload(request):
             return HttpResponseRedirect(url)
 
     return render(request, "upload.html", locals())
-
-def example(request):
-    return render(request, "example.html", locals())

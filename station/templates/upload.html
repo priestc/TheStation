@@ -19,18 +19,17 @@
             m = Math.floor(seconds / 60);
             s = seconds % 60;
             if(s < 10) {
-                s = "0" + s
+                s = "0" + s;
             }
             return m + ":" + s;
         }
 
         $("#id_mp3").change(function(event) {
-            var parser = musicmetadata($(this)[0].files[0], { duration: true }, function(err, result) {
-                console.log("MP3 tags!!!", result);
+            musicmetadata($(this)[0].files[0], {duration: true}, function(err, result) {
                 $("#id_title").val(result.title);
-                $("#id_artist").val(result.artist[0])
+                $("#id_artist").val(result.artist[0]);
                 $("#id_collection").val(result.album);
-                $("#id_recorded_date").val(result.year + "-01-01")
+                $("#id_recorded_date").val(result.year + "-01-01");
                 $("#id_duration").val(to_ms(result.duration));
             });
         });

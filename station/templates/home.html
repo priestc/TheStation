@@ -62,12 +62,13 @@ Play history:
         var player = $("#player");
         player.attr('src', new_song.url);
 
-        $.each(new_song.tips, function(i, tip) {
-            player.data('tip-recipient' + i, tip.recipient);
-            player.data('tip-currency' + i, 'btc');
-            player.data('tip-ratio' + i, tip.ratio);
-            player.data('tip-address' + i, tip.address);
-        });
+        player.text(new_song.tips);
+        //$.each(new_song.tips, function(i, tip) {
+        //    player.data('tip-recipient' + i, tip.recipient);
+        //    player.data('tip-currency' + i, 'btc');
+        //    player.data('tip-ratio' + i, tip.ratio);
+        //    player.data('tip-address' + i, tip.address);
+        //});
 
         if(skip_ahead) {
             console.log("skipping ahead", skip_ahead);

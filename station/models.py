@@ -30,11 +30,11 @@ class Song(models.Model):
         Always returns a list of dicts, each dict containing all the data needed
         to make the microtip meta tags, or microtip audio tag.
         """
-        if self.featuring:
+        all_features = list(self.featuring.all())
+        if all_features:
             feature_tips = []
-            all_feature = self.featuring
-            share = 0.5 / len(all_feature)
-            for feature in all_feature:
+            share = 0.5 / len(all_features)
+            for feature in all_features:
                 feature_tips.append({
                     'recipient': feature.name,
                     'ratio': feature.ratio or share,
@@ -47,9 +47,9 @@ class Song(models.Model):
             }]
 
         return [{
-            'recipient': self.name,
+            'recipient': self.artist.name,
             'ratio': 1.0,
-            'address': self.address,
+            'address': self.artist.address,
         }]
 
     class Meta:
