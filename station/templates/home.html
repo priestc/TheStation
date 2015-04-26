@@ -62,7 +62,7 @@ Play history:
         var player = $("#player");
         player.attr('src', new_song.url);
 
-        player.text(new_song.tips);
+        player.text(JSON.stringify(new_song.tips));
         //$.each(new_song.tips, function(i, tip) {
         //    player.data('tip-recipient' + i, tip.recipient);
         //    player.data('tip-currency' + i, 'btc');
