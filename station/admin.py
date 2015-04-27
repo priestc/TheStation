@@ -5,12 +5,17 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import Artist, Song, StationPlay
+from .models import Artist, Song, StationPlay, Feature
+
+class FeatureInline(admin.TabularInline):
+    model = Feature
+
 
 def generate_address(modeladmin, request, queryset):
     for artist in queryset:
         if not artist.address:
             artist.generate_address()
+
 
 class ArtistAdmin(admin.ModelAdmin):
     list_display = ('name', 'address')
@@ -18,8 +23,16 @@ class ArtistAdmin(admin.ModelAdmin):
     exclude = ('private_key_hex', )
     #readonly_fields = ('private_key_wif', )
 
+
 class SongAdmin(admin.ModelAdmin):
-    list_display = ('title', 'artist', 'year', 'collection', 'genre', 'subgenre', 'has_mp3', 'last_played_ago', 'times_played')
+    list_display = (
+        'title', 'artist', 'year', 'collection', 'genre', 'subgenre',
+        'has_mp3', 'last_played_ago', 'times_played'
+    )
+
+    inlines = [
+        FeatureInline
+    ]
 
     def year(self, obj):
         return obj.recorded_date.strftime("%Y")
