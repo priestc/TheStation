@@ -51,14 +51,14 @@ class Song(models.Model):
             share = 0.5 / len(all_features)
             for feature in all_features:
                 feature_tips.append({
-                    'recipient': feature.name,
+                    'recipient': feature.artist.name,
                     'ratio': feature.ratio or share,
-                    'address': feature.address,
+                    'address': feature.artist.address,
                 })
             return feature_tips + [{
-                'recipient': self.name,
+                'recipient': self.artist.name,
                 'ratio': 0.5,
-                'address': self.address,
+                'address': self.artist.address,
             }]
 
         return [{
