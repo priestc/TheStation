@@ -34,14 +34,20 @@ class Song(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.artist.name, self.title)
 
+    def feat_list(self):
+        featuring = list(self.featuring.all())
+        if featuring:
+            return " feat. " + ",".join([x.name for x in featuring])
+        return ""
+
     def get_tips(self):
         """
         Always returns a list of dicts, each dict containing all the data needed
         to make the microtip meta tags, or microtip audio tag.
         """
-        all_features = list(self.featuring.all())
-        if all_features:
+        if self.featuring.exists():
             feature_tips = []
+            all_features = list(Feature.objects.filter(song=self))
             share = 0.5 / len(all_features)
             for feature in all_features:
                 feature_tips.append({
@@ -139,7 +145,7 @@ class StationPlay(models.Model):
         return {
             'artist': self.song.artist.name,
             'tips': self.song.get_tips(),
-            'title': self.song.title,
+            'title': self.song.title + self.song.feat_list(),
             'start_time': self.start_time,
             'end_time': self.end_time,
             'duration': self.song.duration.total_seconds(),

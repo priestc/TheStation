@@ -28,13 +28,18 @@ class ArtistAdmin(admin.ModelAdmin):
 
 class SongAdmin(admin.ModelAdmin):
     list_display = (
-        'title', 'artist', 'year', 'collection', 'genre', 'subgenre',
+        'title', 'artist_with_featuring', 'year', 'collection', 'genre', 'subgenre',
         'has_mp3', 'last_played_ago', 'times_played'
     )
 
     inlines = [
         FeatureInline
     ]
+
+    def artist_with_featuring(self, obj):
+        feat = obj.feat_list()
+        return "%s<span style='color: blue'>%s</span>" % (obj.artist.name, feat)
+    artist_with_featuring.allow_tags = True
 
     def year(self, obj):
         return obj.recorded_date.strftime("%Y")
