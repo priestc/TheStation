@@ -10,7 +10,7 @@ song_padding = 200
 class Feature(models.Model):
     song = models.ForeignKey('station.Song', related_name='featured_songs')
     artist = models.ForeignKey('station.Artist', related_name='featuring_artists')
-    ratio = models.FloatField()
+    ratio = models.FloatField(blank=True, null=True)
 
     def __unicode__(self):
         return "feat. %s" % self.artist.name
