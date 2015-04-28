@@ -18,11 +18,13 @@ def generate_address(modeladmin, request, queryset):
 
 
 class ArtistAdmin(admin.ModelAdmin):
-    list_display = ('name', 'address')
+    list_display = ('name', 'address', 'song_count')
     actions = [generate_address]
     exclude = ('private_key_hex', )
     #readonly_fields = ('private_key_wif', )
 
+    def song_count(self, obj):
+        return obj.songs.count()
 
 class SongAdmin(admin.ModelAdmin):
     list_display = (
