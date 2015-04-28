@@ -32,9 +32,9 @@ class Song(models.Model):
         unique_together = (("title", "artist"),)
 
     def __unicode__(self):
-        return "%s - %s" % (self.artist.name, self.title)
+        return "%s - %s%s" % (self.artist.name, self.title, self.feat())
 
-    def feat_list(self):
+    def feat(self):
         featuring = list(self.featuring.all())
         if featuring:
             return " feat. " + ",".join([x.name for x in featuring])
@@ -145,7 +145,7 @@ class StationPlay(models.Model):
         return {
             'artist': self.song.artist.name,
             'tips': self.song.get_tips(),
-            'title': self.song.title + self.song.feat_list(),
+            'title': self.song.title + self.song.feat(),
             'start_time': self.start_time,
             'end_time': self.end_time,
             'duration': self.song.duration.total_seconds(),

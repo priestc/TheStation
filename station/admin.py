@@ -37,7 +37,7 @@ class SongAdmin(admin.ModelAdmin):
     ]
 
     def artist_with_featuring(self, obj):
-        feat = obj.feat_list()
+        feat = obj.feat()
         return "%s<span style='color: blue'>%s</span>" % (obj.artist.name, feat)
     artist_with_featuring.allow_tags = True
 
