@@ -56,7 +56,7 @@ class StationPlayAdmin(admin.ModelAdmin):
     list_display = ('ordinal', 'playing', 'starttime', 'endtime2', 'song', 'duration', 'played_ago')
 
     def duration(self, obj):
-        return obj.song.duration.total_seconds()
+        return obj.song.duration
 
     def starttime(self, obj):
         return obj.start_time.strftime("%B %d %Y %H:%M:%S.%f")
