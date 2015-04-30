@@ -28,7 +28,7 @@ class ArtistAdmin(admin.ModelAdmin):
 
 class SongAdmin(admin.ModelAdmin):
     list_display = (
-        'title', 'artist_with_featuring', 'year', 'collection', 'genre', 'subgenre',
+        'title', 'artist_with_featuring', 'year', 'collection', 'duration',
         'has_mp3', 'last_played_ago', 'times_played'
     )
 

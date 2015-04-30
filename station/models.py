@@ -1,4 +1,6 @@
 import datetime
+import random
+
 import pytz
 from django.db import models
 from pybitcoin import BitcoinPrivateKey
@@ -128,18 +130,22 @@ class StationPlay(models.Model):
 
     @classmethod
     def generate_next(cls, last_end):
-        for x in xrange(Song.objects.count()):
-            random_song = Song.objects.exclude(mp3='').order_by("?")[0]
+        chosen_song = None
+        for i, random_song in enumerate(Song.objects.exclude(mp3='').order_by("?")):
             if random_song.is_valid_next():
                 chosen_song = random_song
-                start = last_end
-                end = start + chosen_song.duration + datetime.timedelta(seconds=2)
-                return cls.objects.create(
-                    song=chosen_song,
-                    start_time=start,
-                    end_time=end,
-                ), x
-        raise Exception("No eligible songs")
+                break;
+        else:
+            chosen_song = random_song
+
+        start = last_end
+        end = start + chosen_song.duration + datetime.timedelta(seconds=2)
+
+        return cls.objects.create(
+            song=chosen_song,
+            start_time=start,
+            end_time=end,
+        ), i
 
     def as_dict(self):
         return {
@@ -149,5 +155,6 @@ class StationPlay(models.Model):
             'start_time': self.start_time,
             'end_time': self.end_time,
             'duration': self.song.duration.total_seconds(),
-            'url': self.song.mp3.url
+            'url': self.song.mp3.url,
+            'year': self.song.recorded_date.strftime("%Y"),
         }
