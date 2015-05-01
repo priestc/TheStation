@@ -37,10 +37,31 @@ class Song(models.Model):
         return "%s - %s%s" % (self.artist.name, self.title, self.feat())
 
     def feat(self):
+        """
+        Make the little "feat" tag to put at the end of the title of the song
+        has featuring artists. This function handles putting the commas and
+        amperstand depending on how many features there are.
+        """
         featuring = list(self.featuring.all())
-        if featuring:
-            return " feat. " + ",".join([x.name for x in featuring])
-        return ""
+
+        if not featuring:
+            return ""
+
+        if len(featuring) == 1:
+            return " (feat. %s)" % featuring[0].name
+        elif len(featuring) == 2:
+            return " (feat. %s & %s)" % tuple([x.name for x in featuring])
+
+        last_two = "%s & %s" % tuple([x.name for x in featuring[-2:]])
+        return " (feat. %s, %s)" % (
+            " ,".join([x.name for x in featuring[:-2]]), last_two
+        )
+
+    def estimate_bitrate(self):
+        """
+        Calculat approximate bitrate based on
+        """
+        return ((self.mp3.size / 1024) * 8) / self.duration.total_seconds()
 
     def get_tips(self):
         """
