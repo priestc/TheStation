@@ -61,9 +61,9 @@ Play history:
         // and the next song starting. During that gap, the "current
         // song" is actualy the previous song.
 
-        var artist = $("#currently_playing.artist").text();
-        var title = $("#currently_playing.title").text();
-        var year = $("#currently_playing.year").text();
+        var artist = $("#currently_playing .artist").text();
+        var title = $("#currently_playing .title").text();
+        var year = $("#currently_playing .year").text();
 
         var new_row = $(
             "<div class='play_history'>" +
@@ -118,8 +118,10 @@ Play history:
         }
 
         $("#currently_playing").html(
-            "<span class='artist'>" + new_song.artist + "</span> - <span class='title'>"
-            + "[<span class='year'>" + new_song.year + "</span>] " + new_song.title + "</span>");
+            "<span class='artist'>" + new_song.artist + "</span> - "
+            + "[<span class='year'>" + new_song.year + "</span>] "
+            + "<span class='title'>" + new_song.title + "</span>"
+        );
         player.get(0).play();
     }
 
