@@ -14,5 +14,5 @@ urlpatterns = [
     url(r'^$', views.player, name="home"),
     url(r'^get_artist_donate_address$', views.get_artist_donate_address, name="get_artist_donate_address"),
     url(r'^upload$', views.upload, name="upload"),
-    url(r'^mp3/(?P<path>.*)$', django.views.static.serve, {'document_root': settings.MEDIA_ROOT}),
+    #url(r'^mp3/(?P<path>.*)$', django.views.static.serve, {'document_root': settings.MEDIA_ROOT}),
 ]
