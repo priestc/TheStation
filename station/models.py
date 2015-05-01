@@ -149,7 +149,7 @@ class StationPlay(models.Model):
     def __unicode__(self):
         return "%s - %s - %s" % (self.start_time, self.song, self.end_time)
 
-    @classmehod
+    @classmethod
     def average_bandwidth(cls):
         data = [x.estimate_bitrate() for x in Song.objects.all()]
         return sum(data) / len(data)
