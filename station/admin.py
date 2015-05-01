@@ -29,12 +29,15 @@ class ArtistAdmin(admin.ModelAdmin):
 class SongAdmin(admin.ModelAdmin):
     list_display = (
         'title', 'artist_with_featuring', 'year', 'collection', 'duration',
-        'has_mp3', 'last_played_ago', 'times_played'
+        'has_mp3', 'last_played_ago', 'times_played', 'bitrate'
     )
 
     inlines = [
         FeatureInline
     ]
+
+    def bitrate(self, obj):
+        return "%d kbps" % obj.estimate_bitrate()
 
     def artist_with_featuring(self, obj):
         feat = obj.feat()

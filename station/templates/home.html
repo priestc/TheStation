@@ -13,7 +13,9 @@
 
 <button id="mute">Mute</button><button id="unmute" style="display: none">Un-mute</button><br>
 
-<button>Stop</button><br>
+<button id="start2" style="display: none" onclick="window.location.reload()">Start</button>
+<button id="start">Start</button>
+<button id="stop" style="display: none">Stop</button><br>
 
 Next Song:
 <div id="next_song"></div>
@@ -59,7 +61,25 @@ Play history:
         $("#mute").show();
     })
 
+    var stream_enabled = false;
+    $("#stop").click(function() {
+        $("#player").get(0).pause();
+        stream_enabled = false;
+        $("#start2").show();
+        $(this).hide();
+    });
+    $("#start").click(function() {
+        // get the streaming process going.
+        stream_enabled = true;
+        fetch_next_track();
+        $("#stop").show();
+        $(this).hide();
+    });
+
     function switch_currently_playing(new_song, skip_ahead) {
+        if(!stream_enabled) {
+            return
+        }
         var player = $("#player");
         player.attr('src', new_song.url);
 
@@ -72,7 +92,9 @@ Play history:
             $("#next_song").html("&nbsp;");
         }
 
-        $("#currently_playing").html("<span class='artist'>" + new_song.artist + "</span> - <span class='title'>" + new_song.title + "</span>");
+        $("#currently_playing").html(
+            "<span class='artist'>" + new_song.artist + "</span> - <span class='title'>"
+            + "[" + new_song.year + "] " + new_song.title + "</span>");
         player.get(0).play();
     }
 
@@ -109,7 +131,7 @@ Play history:
 
                     var next_fetch_miliseconds = switch_track_miliseconds + (seconds_to_fetch_next * 1000);
                     setTimeout(fetch_next_track, next_fetch_miliseconds);
-                    console.log("will fetch next song in " + next_fetch_miliseconds / 1000 + " seconds");
+                    console.log("First invocation! will fetch next song in " + next_fetch_miliseconds / 1000 + " seconds");
                     return
                 }
 
@@ -124,14 +146,14 @@ Play history:
                 }, miliseconds_from_now);
 
                 // schedule the next song fetch
-                setTimeout(fetch_next_track, seconds_to_fetch_next * 1000);
-                console.log("next song is " + next_song.duration + " seconds long");
-                console.log("will fetch next song in " + seconds_to_fetch_next + " seconds");
+                if(stream_enabled) {
+                    setTimeout(fetch_next_track, seconds_to_fetch_next * 1000);
+                    console.log("next song is " + next_song.duration + " seconds long");
+                    console.log("will fetch next song in " + seconds_to_fetch_next + " seconds");
+                }
             }
         });
     }
-    // get the streaming process going.
-    fetch_next_track();
 </script>
 
 {% endblock %}
