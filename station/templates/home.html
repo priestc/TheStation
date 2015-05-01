@@ -10,7 +10,7 @@
 
     .error {
         color: red;
-        font-size: large;
+        font-size: x-large;
     }
 
 </style>
@@ -18,7 +18,7 @@
 
 <button id="mute">Mute</button><button id="unmute" style="display: none">Un-mute</button>
 <br>
-<button id="start2" style="display: none" onclick="window.location = '/play'">Start</button>
+<button id="start2" style="display: none" onclick="window.location = '/play'">Restart</button>
 <button id="start">Start</button>
 <button id="stop" style="display: none">Stop</button>
 <br>
@@ -31,6 +31,7 @@ Currently playing:
 
 <div id="player_container"><audio id="player"></audio></div>
 <progress id="seekbar" value="0" max="1" style="width:400px;"></progress>
+<br>
 <br>
 Play history:
 <div id="last_played_container"></div>
@@ -52,7 +53,25 @@ Play history:
     }
 
     $('#player').on('timeupdate', function() {
+        // update the seek bar as the song plays.
         $('#seekbar').attr("value", this.currentTime / this.duration);
+    }).on('ended', function() {
+        // when a song ends, add it to the play history section.
+        // there is a one second gap between the last song ending
+        // and the next song starting. During that gap, the "current
+        // song" is actualy the previous song.
+
+        var artist = $("#currently_playing.artist").text();
+        var title = $("#currently_playing.title").text();
+        var year = $("#currently_playing.year").text();
+
+        var new_row = $(
+            "<div class='play_history'>" +
+            artist + " - " + year + " - " + title +
+            "</div>"
+
+        );
+        $("#last_played_container").prepend(new_row);
     });
 
     $("#mute").click(function() {
@@ -100,7 +119,7 @@ Play history:
 
         $("#currently_playing").html(
             "<span class='artist'>" + new_song.artist + "</span> - <span class='title'>"
-            + "[" + new_song.year + "] " + new_song.title + "</span>");
+            + "[<span class='year'>" + new_song.year + "</span>] " + new_song.title + "</span>");
         player.get(0).play();
     }
 
