@@ -15,5 +15,9 @@ urlpatterns = [
     url(r'^play$', views.player, {'autoplay': True}, name="autoplay"),
     url(r'^get_artist_donate_address$', views.get_artist_donate_address, name="get_artist_donate_address"),
     url(r'^upload$', views.upload, name="upload"),
-    #url(r'^mp3/(?P<path>.*)$', django.views.static.serve, {'document_root': settings.MEDIA_ROOT}),
 ]
+
+if settings.DEBUG:
+    urlpatterns.append(
+        url(r'^mp3/(?P<path>.*)$', django.views.static.serve, {'document_root': settings.MEDIA_ROOT}),
+    )
