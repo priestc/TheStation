@@ -8,14 +8,20 @@
         font-weight: bold
     }
 
+    .error {
+        color: red;
+        font-size: large;
+    }
+
 </style>
 <h1>The Station</h1>
 
-<button id="mute">Mute</button><button id="unmute" style="display: none">Un-mute</button><br>
-
-<button id="start2" style="display: none" onclick="window.location.reload()">Start</button>
+<button id="mute">Mute</button><button id="unmute" style="display: none">Un-mute</button>
+<br>
+<button id="start2" style="display: none" onclick="window.location = '/play'">Start</button>
 <button id="start">Start</button>
-<button id="stop" style="display: none">Stop</button><br>
+<button id="stop" style="display: none">Stop</button>
+<br>
 
 Next Song:
 <div id="next_song"></div>
@@ -151,9 +157,18 @@ Play history:
                     console.log("next song is " + next_song.duration + " seconds long");
                     console.log("will fetch next song in " + seconds_to_fetch_next + " seconds");
                 }
+            },
+            error: function() {
+                $("#next_song").html("<span class='error'>Could not fetch next song. Try restarting the station.</span>")
+                $("#stop").click();
             }
         });
     }
+
+    {% if autoplay %}
+    // Automatically start the station because '/play' in url.
+    $("#start").click();
+    {% endif%}
 </script>
 
 {% endblock %}

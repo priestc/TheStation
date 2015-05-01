@@ -30,8 +30,10 @@ def current_and_next_song(request):
         'next_song': next_play.as_dict(),
     })
 
-def player(request):
-    return render(request, "home.html", {})
+def player(request, autoplay=False):
+    return render(request, "home.html", {'autoplay': autoplay})
+
+
 
 @login_required
 def upload(request):
