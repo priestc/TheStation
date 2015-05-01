@@ -4,8 +4,7 @@ import random
 import pytz
 from django.db import models
 from pybitcoin import BitcoinPrivateKey
-
-# Create your models here.
+from django.conf import settings
 
 song_padding = 200
 
@@ -128,11 +127,30 @@ class Artist(models.Model):
     def __unicode__(self):
         return self.name
 
-    def generate_address(self):
-        if not self.address:
+    def generate_address(self, force=False):
+        if self.address and not force:
+            return
+
+        if not settings.ARTIST_DONATE_ADDRESS_SOURCE:
+            # No donate address has been given in settings
+            # this means we generate a unique one and store the private key
+            # along with it. It is the responsibility of the maintainer
+            # if this installation to make sure the private key is distributed
+            # to the artist.
+
             priv = BitcoinPrivateKey()
             self.private_key_hex = priv.to_hex()
             self.address = priv.public_key().address()
+            self.save()
+        else:
+            # point to another installation of TheStation to get the correct
+            # donate address.
+            url = (
+                settings.ARTIST_DONATE_ADDRESS_SOURCE +
+                "/get_artist_donate_address" +
+                "?artist=%s" % self.name
+            )
+            self.address == requests.get(url).json()['donate_address']
             self.save()
 
         return self.address

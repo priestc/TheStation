@@ -44,3 +44,12 @@ def upload(request):
             return HttpResponseRedirect(url)
 
     return render(request, "upload.html", locals())
+
+def get_artist_donate_address(request):
+    """
+    Most likely this view is being called by another installation of TheStation
+    We return the donate address f the artist passed in.
+    """
+    artist_name = request.GET['artist_name']
+    a = Artist.objects.get(name=artist_name)
+    return JsonResponse({'donate_address': a.address})

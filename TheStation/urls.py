@@ -10,8 +10,9 @@ urlpatterns = [
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^current_and_next_song', views.current_and_next_song),
+    url(r'^current_and_next_song$', views.current_and_next_song),
     url(r'^$', views.player, name="home"),
-    url(r'^upload', views.upload, name="upload"),
+    url(r'^get_artist_donate_address$', views.get_artist_donate_address, name="get_artist_donate_address"),
+    url(r'^upload$', views.upload, name="upload"),
     url(r'^mp3/(?P<path>.*)$', django.views.static.serve, {'document_root': settings.MEDIA_ROOT}),
 ]
