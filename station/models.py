@@ -149,6 +149,16 @@ class StationPlay(models.Model):
     def __unicode__(self):
         return "%s - %s - %s" % (self.start_time, self.song, self.end_time)
 
+    @classmehod
+    def average_bandwidth(cls):
+        data = [x.estimate_bitrate() for x in Song.objects.all()]
+        return sum(data) / len(data)
+
+    @classmethod
+    def average_duration(cls):
+        data = [x.duration.total_seconds() for x in Song.objects.all()]
+        return sum(data) / len(data)
+
     @classmethod
     def generate_next(cls, last_end):
         chosen_song = None
