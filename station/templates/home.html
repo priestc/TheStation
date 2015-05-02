@@ -3,6 +3,9 @@
 {% block content %}
 <meta name="microtip" content="Audio">
 <style>
+    h1 {
+        text-align: center;
+    }
     .title, .artist {
         font-size: large;
         font-weight: bold
@@ -14,39 +17,63 @@
     }
 
     #currently_playing {
+        margin: 0 auto;
         text-align: center;
         padding: 10px;
-        margin: 10px;
         border: 1px solid black;
         background: #dfdfdf;
         max-width: 400px;
     }
 
+    #currently_playing img {
+        height: 300px;
+    }
+
+    .center {
+        padding: 10px;
+        width: 500px;
+        background: #f2f2f2;
+        border: 1px solid gray;
+        font-family: verdana;
+        margin: 0 auto;
+    }
+
+    .buttons {
+        text-align: center;
+    }
+
+    .buttons button {
+        margin: 10px;
+        font-size: large;
+    }
+
 </style>
-<h1>The Station</h1>
+<div class="center">
+    <h1>{{ TITLE|default:"The Station"|safe }}</h1>
 
-<button id="mute">Mute</button><button id="unmute" style="display: none">Un-mute</button>
-<br>
-<button id="start2" style="display: none" onclick="window.location = '/play'">Restart</button>
-<button id="start">Start</button>
-<button id="stop" style="display: none">Stop</button>
-<br>
+    <div class="buttons">
+        <button id="mute">Mute</button><button id="unmute" style="display: none">Un-mute</button>
+        <button id="start2" style="display: none" onclick="window.location = '/play'">Restart</button>
+        <button id="start">Start</button>
+        <button id="stop" style="display: none">Stop</button>
+    </div>
+    <br>
 
-Next Song:
-<div id="next_song"></div>
-<br>
-Currently playing:
-<div id="currently_playing"></div>
+    Next Song:
+    <div id="next_song"></div>
+    <br>
+    <div id="currently_playing"></div>
 
-<audio id="player"></audio>
+    <audio id="player"></audio>
 
-<div id="player_container">
+    <div id="player_container">
+    </div>
+
+    <br>
+    <br>
+    Play history:
+    <div id="last_played_container"></div>
 </div>
-
-<br>
-<br>
-Play history:
-<div id="last_played_container"></div>
 
 <script type="text/javascript" src="{{ STATIC_URL }}admin/js/jquery.js"></script>
 
@@ -65,7 +92,6 @@ Play history:
     }
 
     function get_info_from_lastfm(artist_name, track_name) {
-
         var artist = $
         var key = "{{ LASTFM_KEY }}";
 
@@ -80,11 +106,12 @@ Play history:
         $.ajax({
             url: url,
             success: function(response) {
+                console.log(response);
                 if(response.error) {
                     console.log("Last fm returned error:", response.message);
                     return
                 }
-                var img = response.track.album.image[1]; // medium size
+                var img = response.track.album.image[3]; // large size
                 $("#currently_playing img").attr('src', img["#text"]);
             }
         })
@@ -158,6 +185,7 @@ Play history:
         get_info_from_lastfm(new_song.artist, new_song.title);
 
         $("#currently_playing").html(
+            "Currently Playing<br><br>" +
             "<img><br>" +
             "<span class='artist'>" + new_song.artist + "</span> - "
             + "[<span class='year'>" + new_song.year + "</span>] "

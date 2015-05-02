@@ -35,6 +35,7 @@ def player(request, autoplay=False):
     return render(request, "home.html", {
         'autoplay': autoplay,
         'LASTFM_KEY': settings.LASTFM_KEY,
+        'TITLE': settings.TITLE,
     })
 
 
