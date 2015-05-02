@@ -194,7 +194,7 @@ class StationPlay(models.Model):
     @classmethod
     def cost_per_song_per_user_usd(cls):
         gb_per_song = cls.average_bytes_per_song() / 1024 / 1024 / 1024
-        cost_per_gb = 0.009 # according to Amazon S3 pricing page.
+        cost_per_gb = 0.09 # according to Amazon S3 pricing page.
         return gb_per_song * cost_per_gb
 
     @classmethod
