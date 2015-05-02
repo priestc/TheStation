@@ -56,9 +56,10 @@ class Song(models.Model):
             " ,".join([x.name for x in featuring[:-2]]), last_two
         )
 
-    def estimate_bitrate(self):
+    def estimate_bitrate_kbps(self):
         """
-        Calculat approximate bitrate based on
+        Calculat approximate bitrate based on filesize and duration.
+        Returns a number that is kilobits / second.
         """
         return ((self.mp3.size / 1024) * 8) / self.duration.total_seconds()
 
@@ -168,14 +169,33 @@ class StationPlay(models.Model):
         return "%s - %s - %s" % (self.start_time, self.song, self.end_time)
 
     @classmethod
-    def average_bandwidth(cls):
-        data = [x.estimate_bitrate() for x in Song.objects.all()]
+    def average_bandwidth_kbps(cls):
+        """
+        Returns the average kilobits per second for all songs in the library.
+        """
+        data = [x.estimate_bitrate_kbps() for x in Song.objects.all()]
         return sum(data) / len(data)
 
     @classmethod
-    def average_duration(cls):
+    def average_duration_minutes(cls):
+        """
+        Calculate the average number of minutes each song is in the song library.
+        """
         data = [x.duration.total_seconds() for x in Song.objects.all()]
-        return sum(data) / len(data)
+        return sum(data) / len(data) / 60
+
+    @classmethod
+    def average_bytes_per_song(cls):
+        """
+        The Average bytes of bandwidth used per song.
+        """
+        return (self.average_bandwidth_kbps() * 60 * 8) * cls.average_duration_minutes()
+
+    @classmethod
+    def cost_of_average_song(cls):
+        gb_per_song = cls.average_bytes_per_song() / 1024 / 1024 / 1024
+        cost_per_gb = 0.009 # according to Amazon S3 pricing page.
+        return gb_per_song * cost_per_gb
 
     @classmethod
     def generate_next(cls, last_end):

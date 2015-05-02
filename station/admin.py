@@ -37,7 +37,7 @@ class SongAdmin(admin.ModelAdmin):
     ]
 
     def bitrate(self, obj):
-        return "%d kbps" % obj.estimate_bitrate()
+        return "%d kbps" % obj.estimate_bitrate_kbps()
 
     def artist_with_featuring(self, obj):
         feat = obj.feat()
