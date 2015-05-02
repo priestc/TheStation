@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 
 from .models import StationPlay, Artist, Song
 from .forms import NewSongForm
@@ -31,7 +32,10 @@ def current_and_next_song(request):
     })
 
 def player(request, autoplay=False):
-    return render(request, "home.html", {'autoplay': autoplay})
+    return render(request, "home.html", {
+        'autoplay': autoplay,
+        'LASTFM_KEY': settings.LASTFM_KEY,
+    })
 
 
 

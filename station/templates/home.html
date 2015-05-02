@@ -13,6 +13,15 @@
         font-size: x-large;
     }
 
+    #currently_playing {
+        text-align: center;
+        padding: 10px;
+        margin: 10px;
+        border: 1px solid black;
+        background: #dfdfdf;
+        max-width: 400px;
+    }
+
 </style>
 <h1>The Station</h1>
 
@@ -29,8 +38,11 @@ Next Song:
 Currently playing:
 <div id="currently_playing"></div>
 
-<div id="player_container"><audio id="player"></audio></div>
-<progress id="seekbar" value="0" max="1" style="width:400px;"></progress>
+<audio id="player"></audio>
+
+<div id="player_container">
+</div>
+
 <br>
 <br>
 Play history:
@@ -50,6 +62,32 @@ Play history:
             $('#player').animate({volume: 1.0}, 500);
         }
         window.speechSynthesis.speak(msg);
+    }
+
+    function get_info_from_lastfm(artist_name, track_name) {
+
+        var artist = $
+        var key = "{{ LASTFM_KEY }}";
+
+        if(key == '') {
+            // No lastfm API key configured on the backend.
+            return
+        }
+
+        var url = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=" + key +
+        "&artist=" + artist_name + "&track=" + track_name + "&format=json";
+
+        $.ajax({
+            url: url,
+            success: function(response) {
+                if(response.error) {
+                    console.log("Last fm returned error:", response.message);
+                    return
+                }
+                var img = response.track.album.image[1]; // medium size
+                $("#currently_playing img").attr('src', img["#text"]);
+            }
+        })
     }
 
     $('#player').on('timeupdate', function() {
@@ -117,10 +155,14 @@ Play history:
             $("#next_song").html("&nbsp;");
         }
 
+        get_info_from_lastfm(new_song.artist, new_song.title);
+
         $("#currently_playing").html(
+            "<img><br>" +
             "<span class='artist'>" + new_song.artist + "</span> - "
             + "[<span class='year'>" + new_song.year + "</span>] "
-            + "<span class='title'>" + new_song.title + "</span>"
+            + "<span class='title'>" + new_song.title + "</span>" +
+            "<progress id='seekbar' value='0' max='1' style='width:400px;'></progress>"
         );
         player.get(0).play();
     }
