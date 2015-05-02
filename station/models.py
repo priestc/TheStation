@@ -189,7 +189,7 @@ class StationPlay(models.Model):
         """
         The Average bytes of bandwidth used per song.
         """
-        return (self.average_bandwidth_kbps() * 60 * 8) * cls.average_duration_minutes()
+        return (cls.average_bandwidth_kbps() * 60 * 8) * cls.average_duration_minutes()
 
     @classmethod
     def cost_per_song_per_user_usd(cls):
