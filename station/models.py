@@ -128,6 +128,13 @@ class Artist(models.Model):
     def __unicode__(self):
         return self.name
 
+    def is_verified(self):
+        """
+        Verified means the artist itself has control over the private key,
+        therefore, in this database, the private key is not known.
+        """
+        return not bool(self.private_key_hex)
+
     def generate_address(self, force=False):
         if self.address and not force:
             return

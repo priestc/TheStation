@@ -57,6 +57,6 @@ def get_artist_donate_address(request):
     Most likely this view is being called by another installation of TheStation
     We return the donate address f the artist passed in.
     """
-    artist_name = request.GET['artist_name']
-    a = Artist.objects.get(name=artist_name)
-    return JsonResponse({'donate_address': a.address})
+    artist_name = request.GET['artist_name'].lower()
+    a = Artist.objects.get(name__iexact=artist_name)
+    return JsonResponse({'donate_address': a.address, 'verified': a.is_verified()})
