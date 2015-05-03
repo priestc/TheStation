@@ -37,6 +37,7 @@ def current_and_next_song(request):
     return JsonResponse({
         'current_song': current_play.as_dict(),
         'next_song': next_play.as_dict(),
+        'next_fetch': next_play.start_time + (next_play.song.duration / 2)
     })
 
 def player(request, autoplay=False):

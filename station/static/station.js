@@ -139,9 +139,10 @@ function fetch_next_track() {
         type: "get",
         complete: function(response) {
             console.log("fetching next song");
-            response = response.responseJSON;
-            next_song = response.next_song;
-            current_song = response.current_song;
+            var response = response.responseJSON;
+            var next_song = response.next_song;
+            var current_song = response.current_song;
+            var next_fetch = new Date(response.next_fetch);
 
             $("#next_song").html(
                 "<span class='artist'>" + next_song.artist + "</span>" +
@@ -170,7 +171,8 @@ function fetch_next_track() {
             }, from_now_miliseconds);
 
             // schedule the next track fetch (every 20 seconds)
-            setTimeout(fetch_next_track, 20000);
+            console.log('setting next fetch event for', next_fetch);
+            setTimeout(fetch_next_track, miliseconds_from_now(next_fetch));
         },
         error: function() {
             $("#next_song").html("<span class='error'>Could not fetch next song. Try restarting the station.</span>")
