@@ -11,7 +11,8 @@ from django.core.files.temp import NamedTemporaryFile
 from pybitcoin import BitcoinPrivateKey
 from django.conf import settings
 
-song_padding = 200
+# seconds to schedule between songs
+SONG_PADDING = 2
 
 class Feature(models.Model):
     song = models.ForeignKey('station.Song', related_name='featured_songs')
@@ -236,13 +237,27 @@ class StationPlay(models.Model):
 
     @classmethod
     def generate_next(cls, last_end):
-        last_song = StationPlay.objects.latest('ordinal').song
+        try:
+            last_song = StationPlay.objects.latest('ordinal').song
+        except StationPlay.DoesNotExist:
+            # this is the first song of this station's history. Generate a
+            # previous song to satisify the algorithm.
+            now = datetime.datetime.now(pytz.utc)
+            one_time_random_song = Song.objects.order_by("?")[0]
+            last_play = StationPlay.objects.create(
+                song=one_time_random_song,
+                start_time=now - (one_time_random_song.duration + datetime.timedelta(seconds=SONG_PADDING)),
+                end_time=now
+            )
+            last_song = last_play.song
+
         random_songs = Song.objects.exclude(mp3='').order_by("?")
         j = 0
 
         chosen_song = None
         for i, random_song in enumerate(random_songs):
             if random_song.is_valid_next(last_song):
+                # randomly try each song until an eligible one is found
                 chosen_song = random_song
                 break;
         else:
@@ -253,7 +268,7 @@ class StationPlay(models.Model):
                     break;
 
         start = last_end
-        end = start + chosen_song.duration + datetime.timedelta(seconds=2)
+        end = start + chosen_song.duration + datetime.timedelta(seconds=SONG_PADDING)
 
         return cls.objects.create(
             song=chosen_song,

@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
 from .models import StationPlay, Artist, Song
-from .forms import NewSongForm
+from .forms import UploadSongForm
 
 def get_current_and_next_play():
     now = datetime.datetime.now(pytz.utc)
@@ -57,9 +57,9 @@ def upload(request):
     """
     A very basic MP3 uploader form.
     """
-    form = NewSongForm()
+    form = UploadSongForm()
     if request.POST:
-        form = NewSongForm(request.POST, request.FILES)
+        form = UploadSongForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             url = reverse("upload")

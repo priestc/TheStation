@@ -6,6 +6,7 @@ from django.contrib import admin
 # Register your models here.
 
 from .models import Artist, Song, StationPlay, Feature
+from .forms import SongFormImageURL
 
 class FeatureInline(admin.TabularInline):
     model = Feature
@@ -42,6 +43,9 @@ class SongAdmin(admin.ModelAdmin):
     actions = [fetch_album_art]
     inlines = [FeatureInline]
     readonly_fields = ('picture', )
+    search_fields = ['title', 'artist__name', 'collection']
+    #filter_horizontal = ['has_image']
+    form = SongFormImageURL
 
     def has_image(self, obj):
         return bool(obj.image)

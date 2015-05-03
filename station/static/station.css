@@ -45,6 +45,10 @@ h1 {
     display: none;
 }
 
+#currently_playing .tips {
+    display: none;
+}
+
 #currently_playing img {
     height: 300px;
 }

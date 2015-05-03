@@ -5,13 +5,8 @@ from .models import Song, Artist
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
 
-class NewSongForm(forms.ModelForm):
-    artist = forms.CharField(widget=forms.TextInput)
+class SongFormImageURL(forms.ModelForm):
     image_url = forms.URLField(required=False)
-
-    def clean_artist(self):
-        artist, c = Artist.objects.get_or_create(name=self.cleaned_data['artist'])
-        return artist
 
     def clean(self, *args, **kwargs):
         all_data = self.cleaned_data
@@ -35,3 +30,10 @@ class NewSongForm(forms.ModelForm):
             'subgenre': forms.TextInput,
             'title': forms.TextInput,
         }
+
+class UploadSongForm(SongFormImageURL):
+    artist = forms.CharField(widget=forms.TextInput)
+
+    def clean_artist(self):
+        artist, c = Artist.objects.get_or_create(name=self.cleaned_data['artist'])
+        return artist
