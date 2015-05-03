@@ -263,5 +263,5 @@ class StationPlay(models.Model):
             'duration': self.song.duration.total_seconds(),
             'url': self.song.mp3.url,
             'year': self.song.recorded_date.strftime("%Y"),
-            "img": self.song.img
+            "img": self.song.image.url
         }

@@ -14,7 +14,6 @@ class NewSongForm(forms.ModelForm):
         return artist
 
     def save(self, *args, **kwargs):
-        #import debug
         url = self.cleaned_data['image_url']
         if not self.cleaned_data['image'] and url:
             img_temp = NamedTemporaryFile(delete=True)
