@@ -19,7 +19,11 @@ def generate_address(modeladmin, request, queryset):
 
 def fetch_album_art(modeladmin, request, queryset):
     for song in queryset:
-        song.fetch_img()
+        try:
+            song.fetch_img()
+        except:
+            pass
+
 
 class ArtistAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'song_count')
