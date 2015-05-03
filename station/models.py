@@ -1,9 +1,13 @@
 import datetime
 import random
 import requests
+import urllib2
 
 import pytz
 from django.db import models
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
+
 from pybitcoin import BitcoinPrivateKey
 from django.conf import settings
 
@@ -46,7 +50,11 @@ class Song(models.Model):
 
     def fetch_img(self):
         response = self.fetch_from_lastfm()
-        self.img = response['track']['album']['image'][3]['#text']
+        imgsrc = response['track']['album']['image'][3]['#text']
+        img_temp = NamedTemporaryFile(delete=True)
+        img_temp.write(urllib2.urlopen(imgsrc).read())
+        img_temp.flush()
+        self.image = File(img_temp)
         self.save()
 
     def feat(self):
