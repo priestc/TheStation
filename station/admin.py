@@ -37,16 +37,21 @@ class ArtistAdmin(admin.ModelAdmin):
 class SongAdmin(admin.ModelAdmin):
     list_display = (
         'title', 'artist_with_featuring', 'year', 'collection', 'duration',
-        'has_mp3', 'last_played_ago', 'times_played', 'image' #'bitrate'
+        'has_mp3', 'last_played_ago', 'times_played', 'has_image' #'bitrate'
     )
     actions = [fetch_album_art]
     inlines = [FeatureInline]
+    readonly_fields = ('picture', )
 
-    def image(self, obj):
+    def has_image(self, obj):
+        return bool(obj.img)
+    has_image.boolean = True
+
+    def picture(self, obj):
         if not obj.img:
             return "None"
-        return "<img src='%s' height=50 length=50>" % obj.img
-    image.allow_tags = True
+        return "<img src='%s' height=300 length=300>" % obj.img
+    picture.allow_tags = True
 
     def bitrate(self, obj):
         return "%d kbps" % obj.estimate_bitrate_kbps()
