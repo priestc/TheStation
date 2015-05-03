@@ -13,15 +13,18 @@ class NewSongForm(forms.ModelForm):
         artist, c = Artist.objects.get_or_create(name=self.cleaned_data['artist'])
         return artist
 
-    def save(self, *args, **kwargs):
-        url = self.cleaned_data['image_url']
-        if not self.cleaned_data['image'] and url:
+    def clean(self, *args, **kwargs):
+        all_data = self.cleaned_data
+        url = all_data['image_url']
+        image = all_data['image']
+
+        if not image and url:
             img_temp = NamedTemporaryFile(delete=True)
             img_temp.write(urllib2.urlopen(url).read())
             img_temp.flush()
-            self.cleaned_data['image'] = File(img_temp)
+            all_data['image'] = File(img_temp)
 
-        return super(NewSongForm, self).save(*args, **kwargs)
+        return all_data
 
     class Meta:
         model = Song
