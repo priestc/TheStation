@@ -10,7 +10,7 @@ from django.conf import settings
 from .models import StationPlay, Artist, Song
 from .forms import NewSongForm
 
-def current_and_next_song(request):
+def get_current_and_next_play():
     now = datetime.datetime.now(pytz.utc)
 
     try:
@@ -26,22 +26,37 @@ def current_and_next_song(request):
         next_play, tries = StationPlay.generate_next(current_play.end_time)
         print "Generated new track, tried this many times:", tries
 
+    return current_play, next_play
+
+def current_and_next_song(request):
+    """
+    View to handle the API call for getting the next and currently playing
+    song.
+    """
+    current_play, next_play = get_current_and_next_play()
     return JsonResponse({
         'current_song': current_play.as_dict(),
         'next_song': next_play.as_dict(),
     })
 
 def player(request, autoplay=False):
+    """
+    This view handles making the main audio player page. Aka the home page.
+    """
+    current_play, next_play = get_current_and_next_play()
     return render(request, "home.html", {
+        'current_play': current_play.as_dict(),
+        'next_play': next_play.as_dict(),
         'autoplay': autoplay,
-        'LASTFM_KEY': settings.LASTFM_KEY,
         'TITLE': settings.TITLE,
+        'SKIP_AHEAD': settings.SKIP_AHEAD
     })
-
-
 
 @login_required
 def upload(request):
+    """
+    A very basic MP3 uploader form.
+    """
     form = NewSongForm()
     if request.POST:
         form = NewSongForm(request.POST, request.FILES)
@@ -50,6 +65,7 @@ def upload(request):
             url = reverse("upload")
             return HttpResponseRedirect(url)
 
+    LASTFM_KEY = settings.LASTFM_KEY
     return render(request, "upload.html", locals())
 
 def get_artist_donate_address(request):

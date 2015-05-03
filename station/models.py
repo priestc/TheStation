@@ -1,5 +1,6 @@
 import datetime
 import random
+import requests
 
 import pytz
 from django.db import models
@@ -29,11 +30,24 @@ class Song(models.Model):
 
     mp3 = models.FileField(null=True, blank=True)
 
+    img = models.URLField(blank=True)
+
     class Meta:
         unique_together = (("title", "artist"),)
 
     def __unicode__(self):
         return "%s - %s%s" % (self.artist.name, self.title, self.feat())
+
+    def fetch_from_lastfm(self):
+        url = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=%s&artist=%s&track=%s&format=json" % (
+            settings.LASTFM_KEY, self.artist.name, self.title
+        )
+        return requests.get(url).json()
+
+    def fetch_img(self):
+        response = self.fetch_from_lastfm()
+        self.img = response['track']['album']['image'][3]['#text']
+        self.save()
 
     def feat(self):
         """
@@ -206,13 +220,21 @@ class StationPlay(models.Model):
 
     @classmethod
     def generate_next(cls, last_end):
+        last_song = StationPlay.objects.latest('ordinal').song
+        random_songs = Song.objects.exclude(mp3='').order_by("?")
+        j = 0
+
         chosen_song = None
-        for i, random_song in enumerate(Song.objects.exclude(mp3='').order_by("?")):
+        for i, random_song in enumerate(random_songs):
             if random_song.is_valid_next():
                 chosen_song = random_song
                 break;
         else:
-            chosen_song = random_song
+            # no eligible songs, return any song, except the one that was just played
+            for j, random_song in enumerate(random_songs):
+                if random_song != last_song:
+                    chosen_song = random_song
+                    break;
 
         start = last_end
         end = start + chosen_song.duration + datetime.timedelta(seconds=2)
@@ -221,7 +243,7 @@ class StationPlay(models.Model):
             song=chosen_song,
             start_time=start,
             end_time=end,
-        ), i
+        ), i + j
 
     def as_dict(self):
         return {
@@ -233,4 +255,5 @@ class StationPlay(models.Model):
             'duration': self.song.duration.total_seconds(),
             'url': self.song.mp3.url,
             'year': self.song.recorded_date.strftime("%Y"),
+            "img": self.song.img
         }

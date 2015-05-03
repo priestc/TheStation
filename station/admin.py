@@ -17,6 +17,10 @@ def generate_address(modeladmin, request, queryset):
             artist.generate_address()
 
 
+def fetch_album_art(modeladmin, request, queryset):
+    for song in queryset:
+        song.fetch_img()
+
 class ArtistAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'song_count')
     actions = [generate_address]
@@ -29,12 +33,16 @@ class ArtistAdmin(admin.ModelAdmin):
 class SongAdmin(admin.ModelAdmin):
     list_display = (
         'title', 'artist_with_featuring', 'year', 'collection', 'duration',
-        'has_mp3', 'last_played_ago', 'times_played', #'bitrate'
+        'has_mp3', 'last_played_ago', 'times_played', 'image' #'bitrate'
     )
+    actions = [fetch_album_art]
+    inlines = [FeatureInline]
 
-    inlines = [
-        FeatureInline
-    ]
+    def image(self, obj):
+        if not obj.img:
+            return "None"
+        return "<img src='%s' height=50 length=50>" % obj.img
+    image.allow_tags = True
 
     def bitrate(self, obj):
         return "%d kbps" % obj.estimate_bitrate_kbps()

@@ -3,60 +3,15 @@
 {% block content %}
 <meta name="microtip" content="Audio">
 <meta name="microtip" content="1BoYSGVTHL9ERrFgSk9wDu9GsRUKABdTRc" data-recipient="Bandwidth Fund">
-<style>
-    h1 {
-        text-align: center;
-    }
-    .title, .artist {
-        font-size: large;
-        font-weight: bold
-    }
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}station.css">
 
-    .error {
-        color: red;
-        font-size: x-large;
-    }
-
-    #currently_playing {
-        margin: 0 auto;
-        text-align: center;
-        padding: 10px;
-        border: 1px solid black;
-        background: #dfdfdf;
-        max-width: 400px;
-        min-height: 350px;
-    }
-
-    #currently_playing img {
-        height: 300px;
-    }
-
-    .center {
-        padding: 10px;
-        width: 500px;
-        background: #f2f2f2;
-        border: 1px solid gray;
-        font-family: verdana;
-        margin: 0 auto;
-    }
-
-    .buttons {
-        text-align: center;
-    }
-
-    .buttons button {
-        margin: 10px;
-        font-size: large;
-    }
-
-</style>
 <div class="center">
     <h1>{{ TITLE|default:"The Station"|safe }}</h1>
 
     <div class="buttons">
-        <button id="mute">Mute</button><button id="unmute" style="display: none">Un-mute</button>
+        <button id="mute" style="display: none">Mute</button><button id="unmute" style="display: none">Un-mute</button>
         <button id="start2" style="display: none" onclick="window.location = '/play'">Restart</button>
-        <button id="start">Start</button>
+        <button id="start">Start Listening</button>
         <button id="stop" style="display: none">Stop</button>
     </div>
     <br>
@@ -64,137 +19,157 @@
     Next Song:
     <div id="next_song"></div>
     <br>
-    <div id="currently_playing"></div>
-
-    <audio id="player"></audio>
-
-    <div id="player_container">
+    <br>
+    <div id="currently_playing" class="grayed">
+        {% comment %}
+        Currently Playing<br><br>
+        <audio src='{{ current_play.url }}' preload="none">
+            {{ current_song.tips }}
+        </audio>
+        <img src='{{ current_play.img }}'><br>
+        <span class='artist'>{{ current_play.artist }}</span> -
+        [<span class='year'>{{ current_play.year }}</span>]
+        <span class='title'>{{ current_play.title }}</span>
+        <span class='start_time'>{{ current_play.start_time }}</span>
+        <progress value='0' max='1' style='width: 80%'></progress>
+        {% endcomment %}
     </div>
-
+    <div id="currently_playing_cache" style="display: none"></div>
     <br>
     <br>
-    Play history:
+    <div id="last_played_header" style="display:none">Play History:</div>
     <div id="last_played_container"></div>
+    <small>Powered by <a href="http://github.com/priestc/TheStation">TheStation</a></small>
 </div>
 
 <script type="text/javascript" src="{{ STATIC_URL }}admin/js/jquery.js"></script>
 
 <script>
+    var enable_skip_ahead = {{ SKIP_AHEAD|lower }};
+
     var all_voices = window.speechSynthesis.getVoices();
     function make_bumper(words) {
-        $('#player').animate({volume: 0.1}, 500);
+        $('#currently_playing audio').animate({volume: 0.1}, 500);
         var msg = new SpeechSynthesisUtterance(words);
         var this_hour = (new Date()).getHours();
         msg.voice = all_voices[this_hour];
         msg.onend = function() {
             // after speech is over, bring volume back
-            $('#player').animate({volume: 1.0}, 500);
+            $('#currently_playing audio').animate({volume: 1.0}, 500);
         }
         window.speechSynthesis.speak(msg);
     }
 
-    function get_info_from_lastfm(artist_name, track_name) {
-        var artist = $
-        var key = "{{ LASTFM_KEY }}";
-
-        if(key == '') {
-            // No lastfm API key configured on the backend.
-            return
-        }
-
-        var url = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=" + key +
-        "&artist=" + artist_name + "&track=" + track_name + "&format=json";
-
-        $.ajax({
-            url: url,
-            success: function(response) {
-                console.log(response);
-                if(response.error) {
-                    console.log("Last fm returned error:", response.message);
-                    return
-                }
-                var img = response.track.album.image[3]; // large size
-                $("#currently_playing img").attr('src', img["#text"]);
-            }
-        })
+    function miliseconds_from_now(some_date) {
+        // passed in must be an instance of Date.
+        return some_date.getTime() - (new Date()).getTime();
     }
-
-    $('#player').on('timeupdate', function() {
-        // update the seek bar as the song plays.
-        $('#seekbar').attr("value", this.currentTime / this.duration);
-    }).on('ended', function() {
-        // when a song ends, add it to the play history section.
-        // there is a one second gap between the last song ending
-        // and the next song starting. During that gap, the "current
-        // song" is actualy the previous song.
-
-        var artist = $("#currently_playing .artist").text();
-        var title = $("#currently_playing .title").text();
-        var year = $("#currently_playing .year").text();
-
-        var new_row = $(
-            "<div class='play_history'>" +
-            artist + " - " + year + " - " + title +
-            "</div>"
-
-        );
-        $("#last_played_container").prepend(new_row);
-    });
 
     $("#mute").click(function() {
         $(this).hide();
-        $('#player').get(0).volume = 0.01;
+        $('#currently_playing audio').get(0).volume = 0.01;
         $("#unmute").show();
     });
 
     $("#unmute").click(function() {
         $(this).hide();
-        $('#player').get(0).volume = 1.0;
+        $('#currently_playing audio').get(0).volume = 1.0;
         $("#mute").show();
-    })
+    });
 
     var stream_enabled = false;
     $("#stop").click(function() {
-        $("#player").get(0).pause();
+        $('#currently_playing audio').get(0).pause();
         stream_enabled = false;
         $("#start2").show();
         $(this).hide();
+        $("#currently_playing").addClass("grayed");
     });
-    $("#start").click(function() {
+    $("#start").click(function(event, autostart) {
         // get the streaming process going.
+        console.log("start button clicked!!!!");
         stream_enabled = true;
-        fetch_next_track();
+        if(!autostart) {
+            // don't call this function when doing autostart,
+            // because of a race condition.
+            start_playing_song();
+        }
         $("#stop").show();
+        $("#mute").show();
         $(this).hide();
+        $("#currently_playing").removeClass("grayed");
     });
 
-    function switch_currently_playing(new_song, skip_ahead) {
-        if(!stream_enabled) {
-            return
-        }
-        var player = $("#player");
-        player.attr('src', new_song.url);
+    function start_playing_song() {
+        // This function is called at the time of the next song starting
+        // either at the begining of the song, or while it is in progress.
 
-        player.text(JSON.stringify(new_song.tips));
+        if(stream_enabled) {
+            $("#currently_playing audio").get(0).play();
+            $("#currently_playing audio").on('timeupdate', function() {
+                // update the seek bar as the song plays.
+                $('progress').attr("value", this.currentTime / this.duration);
+            });
 
-        if(skip_ahead) {
-            console.log("skipping ahead", skip_ahead);
-            //player.get(0).currentTime = skip_ahead;
+            $("#currently_playing audio").on('ended', function() {
+                // when a song ends, add it to the play history section.
+                // there is a one second gap between the last song ending
+                // and the next song starting. During that gap, the "current
+                // song" is actualy the previous song.
+
+                var artist = $("#currently_playing .artist").text();
+                var title = $("#currently_playing .title").text();
+                var year = $("#currently_playing .year").text();
+
+                var new_row = $(
+                    "<div class='play_history'>" +
+                    artist + " - " + year + " - " + title +
+                    "</div>"
+                );
+
+                $("#last_played_header").show()
+                $("#last_played_container").prepend(new_row);
+            });
         } else {
-            $("#next_song").html("&nbsp;");
+            console.log("not playing sound because not started");
         }
 
-        get_info_from_lastfm(new_song.artist, new_song.title);
+        var start_time = new Date($("#currently_playing .start_time").text());
 
-        $("#currently_playing").html(
-            "Currently Playing<br><br>" +
-            "<img><br>" +
-            "<span class='artist'>" + new_song.artist + "</span> - "
-            + "[<span class='year'>" + new_song.year + "</span>] "
-            + "<span class='title'>" + new_song.title + "</span>" +
-            "<progress id='seekbar' value='0' max='1' style='width:400px;'></progress>"
+        console.log("start time of currently playing song", start_time);
+        console.log("time is now", (new Date()));
+
+        var seconds_in_prgress = -1 * miliseconds_from_now(start_time) / 1000;
+
+        console.log($("#currently_playing .title").text(), "is", seconds_in_prgress, " seconds in progress")
+
+        if(seconds_in_prgress > 10 && enable_skip_ahead) {
+            // song was supposed to start more than 10 seconds ago. Skip ahead
+            // to the correct time
+            $('#currently_playing audio').bind('canplay', function() {
+                this.currentTime = seconds_in_prgress;
+            });
+        }
+    }
+
+    function make_currently_playing(song, element) {
+        // song = object that comes from next_song or current_song (API call)
+        // element = the element we write this info to. can be either the
+        // visible one or the hidden one (for cache).
+
+        var preload = stream_enabled ? "auto" : "none";
+
+        element.html("Currently Playing<br><br>" +
+            "<audio class='autotip' src='" + song.url + "' preload='" + preload + "'>"
+            + JSON.stringify(song.tips)
+            + "</audio>"
+            + "<img src='" + song.img + "'><br>"
+            + "<span class='artist'>" + song.artist + "</span> - "
+            + "[<span class='year'>" + song.year + "</span>] "
+            + "<span class='title'>" + song.title + "</span>"
+            + "<span class='start_time'>" + song.start_time + "</span>"
+            + "<progress value='0' max='1' style='width: 80%'></progress>"
         );
-        player.get(0).play();
     }
 
     function fetch_next_track() {
@@ -205,51 +180,37 @@
             complete: function(response) {
                 console.log("fetching next song");
                 response = response.responseJSON;
-                next_song = response.next_song
-                current_song = response.current_song
+                next_song = response.next_song;
+                current_song = response.current_song;
 
-                $("#next_song").html("<span class='artist'>" + next_song.artist + "</span> - <span class='title'>" + next_song.title + "</span>");
+                $("#next_song").html(
+                    "<span class='artist'>" + next_song.artist + "</span>" +
+                    " - <span class='title'>" + next_song.title + "</span>"
+                );
 
-                // anywhere between 25% and 75% of the play time.
-                seconds_to_fetch_next = next_song.duration * (Math.random() * 0.5 + 0.25);
-                console.log("after current song ends, wait " + seconds_to_fetch_next + " seconds until next fetch");
+                // load next track into the background so the image and mp3 preload
+                // that way when its time to switch to the next track, it is instant.
+                make_currently_playing(next_song, $("#currently_playing_cache"));
 
-                if(!$("#player").attr('src')) {
-                    // streaming first started
-                    var seconds_skip_ahead = ((new Date()).getTime() - (new Date(current_song.start_time))) / 1000;
-                    switch_currently_playing(current_song, seconds_skip_ahead);
-
-                    // when to change to the next track
-                    var next_start_date = new Date(next_song.start_time);
-                    var switch_track_miliseconds = next_start_date.getTime() - (new Date()).getTime();
-
-                    console.log("switching to next track in " + switch_track_miliseconds / 1000 + "seconds");
-                    setTimeout(function() {
-                        switch_currently_playing(next_song)
-                    }, switch_track_miliseconds);
-
-                    var next_fetch_miliseconds = switch_track_miliseconds + (seconds_to_fetch_next * 1000);
-                    setTimeout(fetch_next_track, next_fetch_miliseconds);
-                    console.log("First invocation! will fetch next song in " + next_fetch_miliseconds / 1000 + " seconds");
-                    return
+                if($("#currently_playing").text().trim() == '') {
+                    // the station has just started up, fill in currently playing too.
+                    make_currently_playing(current_song, $("#currently_playing"));
+                    start_playing_song();
                 }
 
-                // when this track is supposed to start
-                var play_date = new Date(next_song.start_time);
-
-                var miliseconds_from_now = play_date.getTime() - (new Date()).getTime();
-
-                // schedule the next track change.
+                // schedule the next song switch event
+                var next_start_date = new Date(next_song.start_time);
+                var from_now_miliseconds = next_start_date.getTime() - (new Date()).getTime();
+                console.log("setting play switch event of", next_song.title);
                 setTimeout(function() {
-                    switch_currently_playing(next_song)
-                }, miliseconds_from_now);
+                    console.log("executing play switch event for", next_song.title);
+                    make_currently_playing(next_song, $("#currently_playing"));
+                    $("#next_song").html("&nbsp");
+                    start_playing_song();
+                }, from_now_miliseconds);
 
-                // schedule the next song fetch
-                if(stream_enabled) {
-                    setTimeout(fetch_next_track, seconds_to_fetch_next * 1000);
-                    console.log("next song is " + next_song.duration + " seconds long");
-                    console.log("will fetch next song in " + seconds_to_fetch_next + " seconds");
-                }
+                // schedule the next track fetch (every 20 seconds)
+                setTimeout(fetch_next_track, 20000);
             },
             error: function() {
                 $("#next_song").html("<span class='error'>Could not fetch next song. Try restarting the station.</span>")
@@ -257,10 +218,11 @@
             }
         });
     }
+    fetch_next_track();
 
     {% if autoplay %}
     // Automatically start the station because '/play' in url.
-    $("#start").click();
+    $("#start").trigger('click', ['autostart']);
     {% endif%}
 </script>
 

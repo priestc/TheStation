@@ -14,6 +14,29 @@
         <input type="submit">
     </form>
     <script>
+        function get_info_from_lastfm(artist_name, track_name, callback) {
+            var key = "{{ LASTFM_KEY }}";
+
+            if(key == '') {
+                // No lastfm API key configured on the backend.
+                return
+            }
+
+            var url = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=" + key +
+            "&artist=" + artist_name + "&track=" + track_name + "&format=json";
+
+            $.ajax({
+                url: url,
+                success: function(response) {
+                    if(response.error) {
+                        console.log("Last fm returned error:", response.message);
+                        return
+                    }
+                    callback(response);
+                }
+            })
+        }
+
         function to_ms(seconds) {
             // Convert seconds to MM:SS
             m = Math.floor(seconds / 60);
@@ -31,7 +54,12 @@
                 $("#id_collection").val(result.album);
                 $("#id_recorded_date").val(result.year + "-01-01");
                 $("#id_duration").val(to_ms(result.duration));
+                $("#id_img").val("Fetching...");
             });
+            get_info_from_lastfm(result.artist[0], result.title, function(info) {
+                var imgsrc = info.track.album.image[3]["#text"]; // 3 = large size
+                $("#id_img").val(imgsrc);
+            })
         });
 
     </script>
