@@ -13,6 +13,7 @@
         </table>
         <input type="submit">
     </form>
+    <img id="img_preview">
     <script>
         function get_info_from_lastfm(artist_name, track_name, callback) {
             var key = "{{ LASTFM_KEY }}";
@@ -33,6 +34,9 @@
                         return
                     }
                     callback(response);
+                },
+                error: function() {
+                    console.log("Can't get info from last.fm");
                 }
             })
         }
@@ -54,12 +58,20 @@
                 $("#id_collection").val(result.album);
                 $("#id_recorded_date").val(result.year + "-01-01");
                 $("#id_duration").val(to_ms(result.duration));
-                $("#id_img").val("Fetching...");
+                $("#id_image_url").val("Fetching...");
+
+
+                get_info_from_lastfm(result.artist[0], result.title, function(info) {
+                    try {
+                        var imgsrc = info.track.album.image[3]["#text"]; // 3 = large size
+                        $("#id_image_url").val(imgsrc);
+                        $("#img_preview").attr('src', imgsrc);
+                    } catch (e) {
+                        $("#id_image_url").val("");
+                        console.log("Could not get info from last.fm", e);
+                    }
+                });
             });
-            get_info_from_lastfm(result.artist[0], result.title, function(info) {
-                var imgsrc = info.track.album.image[3]["#text"]; // 3 = large size
-                $("#id_img").val(imgsrc);
-            })
         });
 
     </script>

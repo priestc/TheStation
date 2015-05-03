@@ -30,7 +30,7 @@ class Song(models.Model):
 
     mp3 = models.FileField(null=True, blank=True)
 
-    img = models.URLField(blank=True)
+    image = models.ImageField(blank=True)
 
     class Meta:
         unique_together = (("title", "artist"),)
@@ -72,7 +72,7 @@ class Song(models.Model):
 
     def estimate_bitrate_kbps(self):
         """
-        Calculat approximate bitrate based on filesize and duration.
+        Calculate approximate bitrate based on filesize and duration.
         Returns a number that is kilobits / second.
         """
         return ((self.mp3.size / 1024) * 8) / self.duration.total_seconds()
@@ -115,11 +115,19 @@ class Song(models.Model):
     def last_played_ago(self):
         return datetime.datetime.now(pytz.utc) - self.last_played
 
-    def is_valid_next(self):
+    def is_valid_next(self, last_song):
         """
         Is this song eligible to be the next song in the station?
         Determine this by comparing it with the
         """
+        if not self.image:
+            return False
+
+        if self.genre and self.genre == last_song.genre:
+            return False
+
+        if self.collection and last_song.collection == self.collection:
+            return False
 
         title_repeat = int(Song.objects.count() / 2)
         artist_repeat = int(Artist.objects.count() / 3)
@@ -226,7 +234,7 @@ class StationPlay(models.Model):
 
         chosen_song = None
         for i, random_song in enumerate(random_songs):
-            if random_song.is_valid_next():
+            if random_song.is_valid_next(last_song):
                 chosen_song = random_song
                 break;
         else:

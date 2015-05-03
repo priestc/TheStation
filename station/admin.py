@@ -44,13 +44,13 @@ class SongAdmin(admin.ModelAdmin):
     readonly_fields = ('picture', )
 
     def has_image(self, obj):
-        return bool(obj.img)
+        return bool(obj.image)
     has_image.boolean = True
 
     def picture(self, obj):
-        if not obj.img:
+        if not obj.image:
             return "None"
-        return "<img src='%s' height=300 length=300>" % obj.img
+        return "<img src='%s' height=300 length=300>" % obj.image.url
     picture.allow_tags = True
 
     def bitrate(self, obj):
