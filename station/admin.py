@@ -64,6 +64,7 @@ class SongAdmin(admin.ModelAdmin):
         feat = obj.feat()
         return "%s<span style='color: blue'>%s</span>" % (obj.artist.name, feat)
     artist_with_featuring.allow_tags = True
+    artist_with_featuring.admin_order_field = 'artist__name'
 
     def year(self, obj):
         return obj.recorded_date.strftime("%Y")

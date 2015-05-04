@@ -38,15 +38,11 @@ $("#stop").click(function() {
     $("#currently_playing").addClass("grayed");
     $("#currently_playing .status").text("Not Streaming");
 });
-$("#start").click(function(event, autostart) {
+$("#start").click(function(event) {
     // get the streaming process going.
     console.log("start button clicked!!!!");
     stream_enabled = true;
-    if(!autostart) {
-        // don't call this function when doing autostart,
-        // because of a race condition.
-        start_playing_song();
-    }
+    start_playing_song();
     $("#stop").show();
     $("#mute").show();
     $(this).hide();
@@ -103,11 +99,16 @@ function start_playing_song() {
 
     console.log($("#currently_playing .title").text(), "is", seconds_in_prgress, " seconds in progress")
 
+    var ticked = false;
     if(seconds_in_prgress > 10 && enable_skip_ahead) {
         // song was supposed to start more than 10 seconds ago. Skip ahead
         // to the correct time
-        $('#player').bind('canplay', function() {
-            this.currentTime = seconds_in_prgress;
+        $('#player').on('canplay', function() {
+            if(!ticked) {
+                console.log("skipping ahead to " + seconds_in_prgress);
+                this.currentTime = seconds_in_prgress;
+                ticked = true;
+            }
         });
     }
 }
@@ -124,7 +125,7 @@ function make_currently_playing(song, element) {
         + "<audio class='cache_audio' src='" + song.url + "' preload='" + preload + "'></audio>"
         + "<span class='tips'>" + JSON.stringify(song.tips) + "</span>"
         + "<img src='" + song.img + "'><br>"
-        + "<span class='artist'>" + song.artist + "</span> - "
+        + "<span class='artist'>" + song.artist + "</span> "
         + "[<span class='year'>" + song.year + "</span>] "
         + "<span class='title'>" + song.title + "</span>"
         + "<span class='start_time'>" + song.start_time + "</span>"
@@ -146,18 +147,19 @@ function fetch_next_track() {
 
             $("#next_song").html(
                 "<span class='artist'>" + next_song.artist + "</span>" +
-                " - <span class='title'>" + next_song.title + "</span>"
+                " [<span class='year'>"+ next_song.year +
+                "</span>] <span class='title'>" + next_song.title + "</span>"
             );
 
             // load next track into the background so the image and mp3 preload
             // that way when its time to switch to the next track, it is instant.
             make_currently_playing(next_song, $("#currently_playing_cache"));
 
-            if($("#currently_playing").text().trim() == '') {
-                // the station has just started up, fill in currently playing too.
-                make_currently_playing(current_song, $("#currently_playing"));
-                start_playing_song();
-            }
+            // if($("#currently_playing").text().trim() == '') {
+            //     // the station has just started up, fill in currently playing too.
+            //     make_currently_playing(current_song, $("#currently_playing"));
+            //     start_playing_song();
+            // }
 
             // schedule the next song switch event
             var next_start_date = new Date(next_song.start_time);
@@ -170,7 +172,7 @@ function fetch_next_track() {
                 start_playing_song();
             }, from_now_miliseconds);
 
-            // schedule the next track fetch (every 20 seconds)
+            // schedule the next track fetch (half way through the currently playing song)
             console.log('setting next fetch event for', next_fetch);
             setTimeout(fetch_next_track, miliseconds_from_now(next_fetch));
         },

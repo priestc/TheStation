@@ -41,7 +41,7 @@ h1 {
 #currently_playing .title {
     color: #CE1E39;
 }
-.start_time {
+#currently_playing .start_time {
     display: none;
 }
 
@@ -55,7 +55,7 @@ h1 {
 
 .center {
     padding: 10px;
-    width: 500px;
+    width: 80%;
     background: #f2f2f2;
     border: 1px solid gray;
     font-family: verdana;
