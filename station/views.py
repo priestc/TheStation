@@ -1,5 +1,6 @@
 import datetime
 import pytz
+import json
 
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseRedirect
@@ -53,6 +54,7 @@ def player(request, autoplay=False):
         'autoplay': autoplay,
         'TITLE': settings.TITLE,
         'next_fetch': next_fetch,
+        'next_play_json': json.dumps(next_play.as_dict()),
         'SKIP_AHEAD': settings.SKIP_AHEAD
     })
 
@@ -77,6 +79,6 @@ def get_artist_donate_address(request):
     Most likely this view is being called by another installation of TheStation
     We return the donate address f the artist passed in.
     """
-    artist_name = request.GET['artist_name'].lower()
+    artist_name = request.GET['artist'].lower()
     a = Artist.objects.get(name__iexact=artist_name)
     return JsonResponse({'donate_address': a.address, 'verified': a.is_verified()})

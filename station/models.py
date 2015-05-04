@@ -185,7 +185,7 @@ class Artist(models.Model):
             # point to another installation of TheStation to get the correct
             # donate address.
             url = (
-                settings.ARTIST_DONATE_ADDRESS_SOURCE +
+                "http://" + settings.ARTIST_DONATE_ADDRESS_SOURCE +
                 "/get_artist_donate_address" +
                 "?artist=%s" % self.name
             )
@@ -281,8 +281,8 @@ class StationPlay(models.Model):
             'artist': self.song.artist.name,
             'tips': self.song.get_tips(),
             'title': self.song.title + self.song.feat(),
-            'start_time': self.start_time,
-            'end_time': self.end_time,
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat(),
             'duration': self.song.duration.total_seconds(),
             'url': self.song.mp3.url,
             'year': self.song.recorded_date.strftime("%Y"),

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="microtip" content="Audio">
 <meta name="microtip" content="1BoYSGVTHL9ERrFgSk9wDu9GsRUKABdTRc" data-recipient="Bandwidth Fund">
 <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}station.css">
@@ -34,7 +35,8 @@
         <span class='artist'>{{ current_play.artist }}</span>
         [<span class='year'>{{ current_play.year }}</span>]
         <span class='title'>{{ current_play.title }}</span>
-        <span class='start_time'>{{ current_play.start_time.isoformat }}</span>
+        <span class='duration'>{{ current_play.duration }}</span>
+        <span class='start_time'>{{ current_play.start_time }}</span>
         <progress value='0' max='1' style='width: 80%'></progress>
     </div>
     <div id="currently_playing_cache" style="display: none"></div>
@@ -63,10 +65,14 @@
     {% endif%}
 
     var fetch = new Date('{{ next_fetch.isoformat }}');
-    setTimeout(function() {
-        fetch_next_track();
-    }, miliseconds_from_now(fetch));
+    var ms_to_fetch = miliseconds_from_now(fetch)
+    console.log("scheduling first 'next song fetch' for", fetch, "in", ms_to_fetch / 1000, "seconds")
+    setTimeout(fetch_next_track, ms_to_fetch);
 
+    var next_start_date = new Date('{{ next_play.start_time }}');
+    var ms_to_start = miliseconds_from_now(next_start_date);
+    console.log("scheduling switch to {{ next_play.artist|safe }} {{ next_play.title|safe }} in", ms_to_start / 1000, "seconds")
+    setTimeout(switch_song, ms_to_start, {{ next_play_json|safe }});
 </script>
 
 {% endblock %}

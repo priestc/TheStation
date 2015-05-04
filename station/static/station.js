@@ -95,18 +95,22 @@ function start_playing_song() {
     console.log("start time of currently playing song", start_time);
     console.log("time is now", (new Date()));
 
-    var seconds_in_prgress = -1 * miliseconds_from_now(start_time) / 1000;
+    var seconds_in_progress = -1 * miliseconds_from_now(start_time) / 1000;
 
-    console.log($("#currently_playing .title").text(), "is", seconds_in_prgress, " seconds in progress")
+    console.log(
+        $("#currently_playing .title").text(), "is", seconds_in_progress,
+        "seconds in progress of", $("#currently_playing .duration").text(),
+        "total_seconds"
+    );
 
     var ticked = false;
-    if(seconds_in_prgress > 10 && enable_skip_ahead) {
+    if(seconds_in_progress > 10 && enable_skip_ahead) {
         // song was supposed to start more than 10 seconds ago. Skip ahead
         // to the correct time
         $('#player').on('canplay', function() {
             if(!ticked) {
-                console.log("skipping ahead to " + seconds_in_prgress);
-                this.currentTime = seconds_in_prgress;
+                console.log("skipping ahead to " + seconds_in_progress);
+                this.currentTime = seconds_in_progress;
                 ticked = true;
             }
         });
@@ -129,14 +133,22 @@ function make_currently_playing(song, element) {
         + "[<span class='year'>" + song.year + "</span>] "
         + "<span class='title'>" + song.title + "</span>"
         + "<span class='start_time'>" + song.start_time + "</span>"
+        + "<span class='duration'>" + song.duration + "</span>"
         + "<br><progress value='0' max='1' style='width: 80%'></progress>"
     );
+}
+
+function switch_song(next_song) {
+    console.log("executing play switch event for", next_song.artist, next_song.title);
+    make_currently_playing(next_song, $("#currently_playing"));
+    $("#next_song").html("&nbsp");
+    start_playing_song();
 }
 
 function fetch_next_track() {
     // hit the backend to get the next song.
     $.ajax({
-        url: "/current_and_next_song",
+        url: "/current_and_next_song?t=" + (new Date()).toISOString(),
         type: "get",
         complete: function(response) {
             console.log("fetching next song");
@@ -155,25 +167,14 @@ function fetch_next_track() {
             // that way when its time to switch to the next track, it is instant.
             make_currently_playing(next_song, $("#currently_playing_cache"));
 
-            // if($("#currently_playing").text().trim() == '') {
-            //     // the station has just started up, fill in currently playing too.
-            //     make_currently_playing(current_song, $("#currently_playing"));
-            //     start_playing_song();
-            // }
-
             // schedule the next song switch event
             var next_start_date = new Date(next_song.start_time);
-            var from_now_miliseconds = next_start_date.getTime() - (new Date()).getTime();
-            setTimeout(function() {
-                console.log("executing play switch event for", next_song.title);
-                make_currently_playing(next_song, $("#currently_playing"));
-                $("#next_song").html("&nbsp");
-                start_playing_song();
-            }, from_now_miliseconds);
+            setTimeout(switch_song, miliseconds_from_now(next_start_date), next_song);
 
             // schedule the next track fetch (half way through the currently playing song)
-            console.log('setting next fetch event for', next_fetch);
-            setTimeout(fetch_next_track, miliseconds_from_now(next_fetch));
+            var ms_to_fetch = miliseconds_from_now(next_fetch);
+            console.log('scheduling next fetch event for', next_fetch, "in", ms_to_fetch / 1000, "seconds");
+            setTimeout(fetch_next_track, ms_to_fetch);
         },
         error: function() {
             $("#next_song").html("<span class='error'>Could not fetch next song. Try restarting the station.</span>")
