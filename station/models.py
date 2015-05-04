@@ -189,7 +189,7 @@ class Artist(models.Model):
                 "/get_artist_donate_address" +
                 "?artist=%s" % self.name
             )
-            self.address == requests.get(url).json()['donate_address']
+            self.address = requests.get(url).json()['donate_address']
             self.save()
 
         return self.address
