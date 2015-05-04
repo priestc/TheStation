@@ -164,7 +164,6 @@ function fetch_next_track() {
             // schedule the next song switch event
             var next_start_date = new Date(next_song.start_time);
             var from_now_miliseconds = next_start_date.getTime() - (new Date()).getTime();
-            console.log("setting play switch event of", next_song.title);
             setTimeout(function() {
                 console.log("executing play switch event for", next_song.title);
                 make_currently_playing(next_song, $("#currently_playing"));
@@ -182,4 +181,3 @@ function fetch_next_track() {
         }
     });
 }
-fetch_next_track();

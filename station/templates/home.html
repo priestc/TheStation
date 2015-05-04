@@ -59,9 +59,14 @@
 <script>
     {% if autoplay %}
     // Automatically start the station because '/play' in url.
-    // also include the message 'autostart' with the event to avoid a race condition.
     $("#start").trigger('click');
     {% endif%}
+
+    var fetch = new Date('{{ next_fetch.isoformat }}');
+    setTimeout(function() {
+        fetch_next_track();
+    }, miliseconds_from_now(fetch));
+
 </script>
 
 {% endblock %}

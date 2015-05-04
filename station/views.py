@@ -26,30 +26,33 @@ def get_current_and_next_play():
         next_play, tries = StationPlay.generate_next(current_play.end_time)
         print "Generated new track, tried this many times:", tries
 
-    return current_play, next_play
+    next_fetch = next_play.start_time + (next_play.song.duration / 2)
+
+    return current_play, next_play, next_fetch
 
 def current_and_next_song(request):
     """
     View to handle the API call for getting the next and currently playing
     song.
     """
-    current_play, next_play = get_current_and_next_play()
+    current_play, next_play, next_fetch = get_current_and_next_play()
     return JsonResponse({
         'current_song': current_play.as_dict(),
         'next_song': next_play.as_dict(),
-        'next_fetch': next_play.start_time + (next_play.song.duration / 2)
+        'next_fetch': next_fetch,
     })
 
 def player(request, autoplay=False):
     """
     This view handles making the main audio player page. Aka the home page.
     """
-    current_play, next_play = get_current_and_next_play()
+    current_play, next_play, next_fetch = get_current_and_next_play()
     return render(request, "home.html", {
         'current_play': current_play.as_dict(),
         'next_play': next_play.as_dict(),
         'autoplay': autoplay,
         'TITLE': settings.TITLE,
+        'next_fetch': next_fetch,
         'SKIP_AHEAD': settings.SKIP_AHEAD
     })
 
