@@ -45,7 +45,7 @@ class Song(models.Model):
 
     def fetch_from_lastfm(self):
         url = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=%s&artist=%s&track=%s&format=json" % (
-            settings.LASTFM_KEY, self.artist.name, self.title
+            settings.LASTFM_KEY, self.artist.name, "%s %s" % (self.title, self.feat)
         )
         return requests.get(url).json()
 
