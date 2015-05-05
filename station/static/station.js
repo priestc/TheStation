@@ -109,6 +109,9 @@ function start_playing_song() {
         // to the correct time
         $('#player').on('canplay', function() {
             if(!ticked) {
+                // calculate again to account for the time it takes to load
+                // the fist few frames 
+                var seconds_in_progress = -1 * miliseconds_from_now(start_time) / 1000;
                 console.log("skipping ahead to " + seconds_in_progress);
                 this.currentTime = seconds_in_progress;
                 ticked = true;
