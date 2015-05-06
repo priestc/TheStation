@@ -15,6 +15,10 @@ h1 {
     background: lightgreen;
 }
 
+#start2 {
+    background: #66C9AA;
+}
+
 #stop {
     background: red;
     color: white;
@@ -24,12 +28,35 @@ h1 {
     background: lightblue;
 }
 
+
+/* The various playing backgrounds */
+.pbg-0 {
+    background: #9A9A9A; /* gray - not playing */
+}
+.pbg-1 {
+    background: #CDB1B1;
+}
+.pbg-2 {
+    background: #CDBBB1;
+}
+.pbg-3 {
+    background: #B1CDBD;
+}
+.pbg-4 {
+    background: #B1B3CD;
+}
+.pbg-5 {
+    background: #CDB1CA;
+}
+.pbg-6 {
+    background: #CCCDB1;
+}
+
 #currently_playing {
     margin: 0 auto;
     text-align: center;
     padding: 10px;
     border: 1px solid black;
-    background: #dfdfdf;
     max-width: 400px;
     min-height: 350px;
 }
@@ -50,6 +77,10 @@ h1 {
 }
 
 #currently_playing .duration {
+    display: none;
+}
+
+#currently_playing .mp3src {
     display: none;
 }
 
@@ -76,6 +107,7 @@ h1 {
     cursor: pointer;
     font-size: x-large;
     padding: 20px;
+    border-radius: 10px;
 }
 
 #last_played_container {

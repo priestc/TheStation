@@ -54,7 +54,8 @@ def player(request, autoplay=False):
         'autoplay': autoplay,
         'TITLE': settings.TITLE,
         'next_fetch': next_fetch,
-        'next_play_json': json.dumps(next_play.as_dict()),
+        'next_play_json': json.dumps(next_play.as_dict()), # django should have a built-in json template tag
+        'current_play_tips_json': json.dumps(current_play.as_dict()['tips']),
         'SKIP_AHEAD': settings.SKIP_AHEAD
     })
 

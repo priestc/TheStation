@@ -23,14 +23,13 @@
     </div>
     <br>
 
-    Next Song:
     <div id="next_song"></div>
     <br>
     <br>
-    <div id="currently_playing" class="grayed">
+    <div id="currently_playing" class="grayed pbg-0">
         <span class="status">Not Currently Streaming</span><br><br>
-        <audio class="cache_audio" src='{{ current_play.url }}' preload="{% if autoplay %}auto{% else %}none{% endif %}"></audio>
-        <span class="tips">{{ current_song.tips }}</span>
+        <span class="mp3src">{{ current_play.url }}</span>
+        <span class="tips">{{ current_play_tips_json }}</span>
         <img src='{{ current_play.img }}'><br>
         <span class='artist'>{{ current_play.artist }}</span>
         [<span class='year'>{{ current_play.year }}</span>]
@@ -65,14 +64,17 @@
     {% endif%}
 
     var fetch = new Date('{{ next_fetch.isoformat }}');
-    var ms_to_fetch = miliseconds_from_now(fetch)
-    console.log("scheduling first 'next song fetch' for", fetch, "in", ms_to_fetch / 1000, "seconds")
+    var ms_to_fetch = miliseconds_from_now(fetch);
+    console.log("HOME PAGE: scheduling first fetch for", fetch, "which is", ms_to_fetch / 1000, "seconds from now")
     setTimeout(fetch_next_track, ms_to_fetch);
 
-    var next_start_date = new Date('{{ next_play.start_time }}');
-    var ms_to_start = miliseconds_from_now(next_start_date);
-    console.log("scheduling switch to {{ next_play.artist|safe }} {{ next_play.title|safe }} in", ms_to_start / 1000, "seconds")
+    var next_start = new Date('{{ next_play.start_time }}');
+    var ms_to_start = miliseconds_from_now(next_start);
+    console.log("HOME PAGE: scheduling switch to {{ next_play.artist|safe }} {{ next_play.title|safe }} for", next_start, "in", ms_to_start / 1000, "seconds")
     setTimeout(switch_song, ms_to_start, {{ next_play_json|safe }});
+
+    setTimeout(make_random_background, (ms_to_start - 5000));
+
 </script>
 
 {% endblock %}

@@ -35,6 +35,7 @@ $("#stop").click(function() {
     stream_enabled = false;
     $("#start2").show();
     $(this).hide();
+    $("#mute").hide();
     $("#currently_playing").addClass("grayed");
     $("#currently_playing .status").text("Not Streaming");
 });
@@ -47,6 +48,7 @@ $("#start").click(function(event) {
     $("#mute").show();
     $(this).hide();
     $("#currently_playing").removeClass("grayed");
+    make_random_background();
 });
 
 $("#player").on('timeupdate', function() {
@@ -72,7 +74,7 @@ $("#player").on('ended', function() {
         "</div>"
     );
 
-    $("#last_played_header").show()
+    $("#last_played_header").show();
     $("#last_played_container").prepend(new_row);
 });
 
@@ -84,7 +86,7 @@ function start_playing_song() {
         var player = $("#player");
         player.text($("#currently_playing .tips").text());
         $("#currently_playing .status").text("Currently Streaming");
-        player.attr("src", $("#currently_playing .cache_audio").attr('src'));
+        player.attr("src", $("#currently_playing .mp3src").text());
         player.get(0).play();
     } else {
         console.log("not playing sound or loading mp3 because not started");
@@ -110,7 +112,7 @@ function start_playing_song() {
         $('#player').on('canplay', function() {
             if(!ticked) {
                 // calculate again to account for the time it takes to load
-                // the fist few frames 
+                // the fist few frames
                 var seconds_in_progress = -1 * miliseconds_from_now(start_time) / 1000;
                 console.log("skipping ahead to " + seconds_in_progress);
                 this.currentTime = seconds_in_progress;
@@ -126,10 +128,10 @@ function make_currently_playing(song, element) {
     // visible one or the hidden one (for cache).
 
     var preload = stream_enabled ? "auto" : "none";
-    var status = stream_enabled ? "Currently Streaming" : "Not Currently Streaming"
+    var status = stream_enabled ? "Currently Streaming" : "Not Currently Streaming";
 
     element.html("<span class='status'>" + status + "</span><br><br>"
-        + "<audio class='cache_audio' src='" + song.url + "' preload='" + preload + "'></audio>"
+        + "<span class='mp3src'>" + song.url + "</span>"
         + "<span class='tips'>" + JSON.stringify(song.tips) + "</span>"
         + "<img src='" + song.img + "'><br>"
         + "<span class='artist'>" + song.artist + "</span> "
@@ -139,6 +141,15 @@ function make_currently_playing(song, element) {
         + "<span class='duration'>" + song.duration + "</span>"
         + "<br><progress value='0' max='1' style='width: 80%'></progress>"
     );
+}
+
+function make_random_background() {
+    if(!stream_enabled) {
+        return;
+    }
+    var random_num = Math.floor(Math.random() * 5) + 1;
+    $("#currently_playing").removeClass().addClass("pbg-" + random_num);
+    console.log("switched background to #", random_num);
 }
 
 function switch_song(next_song) {
@@ -161,8 +172,9 @@ function fetch_next_track() {
             var next_fetch = new Date(response.next_fetch);
 
             $("#next_song").html(
+                "Next Song:<br>" +
                 "<span class='artist'>" + next_song.artist + "</span>" +
-                " [<span class='year'>"+ next_song.year +
+                " [<span class='year'>" + next_song.year +
                 "</span>] <span class='title'>" + next_song.title + "</span>"
             );
 
@@ -171,13 +183,19 @@ function fetch_next_track() {
             make_currently_playing(next_song, $("#currently_playing_cache"));
 
             // schedule the next song switch event
-            var next_start_date = new Date(next_song.start_time);
-            setTimeout(switch_song, miliseconds_from_now(next_start_date), next_song);
+            var next_start = new Date(next_song.start_time);
+            var ms_to_start = miliseconds_from_now(next_start);
+            console.log("scheduling next_song for", next_start, "in", ms_to_start / 1000, "seconds from now");
+            setTimeout(switch_song, ms_to_start, next_song);
 
             // schedule the next track fetch (half way through the currently playing song)
             var ms_to_fetch = miliseconds_from_now(next_fetch);
-            console.log('scheduling next fetch event for', next_fetch, "in", ms_to_fetch / 1000, "seconds");
+            console.log('scheduling next fetch for', next_fetch, "in", ms_to_fetch / 1000, "seconds from now");
             setTimeout(fetch_next_track, ms_to_fetch);
+
+            // schedule the next background color change (a few seconds before)
+            // the track is scheduled to change
+            setTimeout(make_random_background, (ms_to_start - 5000));
         },
         error: function() {
             $("#next_song").html("<span class='error'>Could not fetch next song. Try restarting the station.</span>")
