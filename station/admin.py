@@ -27,7 +27,7 @@ def fetch_album_art(modeladmin, request, queryset):
 
 
 class ArtistAdmin(admin.ModelAdmin):
-    list_display = ('name', 'address', 'song_count')
+    list_display = ('name', 'address', 'song_count', 'play_count')
     actions = [generate_address]
     exclude = ('private_key_hex', )
     search_fields = ('name', )
@@ -35,6 +35,9 @@ class ArtistAdmin(admin.ModelAdmin):
 
     def song_count(self, obj):
         return obj.songs.count()
+
+    def play_count(self, obj):
+        return StationPlay.objects.filter(song__artist=obj).count()
 
 class SongAdmin(admin.ModelAdmin):
     list_display = (
