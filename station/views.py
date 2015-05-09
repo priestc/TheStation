@@ -3,7 +3,7 @@ import pytz
 import json
 
 from django.shortcuts import render
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
@@ -19,6 +19,11 @@ def get_current_and_next_play():
     except StationPlay.DoesNotExist:
         # no current_play == station went dead due to no listeners
         current_play, tries = StationPlay.generate_next(now)
+    except StationPlay.MultipleObjectsReturned:
+        # keep the first, delete the second duplicate
+        sp = StationPlay.objects.filter(start_time__lt=now, end_time__gt=now)
+        current_play = sp[0]
+        [x.delete() for x in sp[1:]]
 
     try:
         next_play = StationPlay.objects.get(start_time__gt=now)
@@ -80,6 +85,17 @@ def get_artist_donate_address(request):
     Most likely this view is being called by another installation of TheStation
     We return the donate address f the artist passed in.
     """
-    artist_name = request.GET['artist'].lower()
-    a = Artist.objects.get(name__iexact=artist_name)
-    return JsonResponse({'donate_address': a.address, 'verified': a.is_verified()})
+    if not settings.SERVE_ADDRESSES:
+        raise HttpResponseForbidden("Not enabled")
+
+    artist_name = request.GET['artist']
+    try:
+        artist = Artist.objects.get(name__iexact=artist_name)
+    except Artist.DoesNotExist:
+        artist = Artist.objects.create(name=artist_name)
+        artist.generate_address()
+
+    return JsonResponse({
+        'donate_address': artist.address,
+        'verified': artist.is_verified()
+    })

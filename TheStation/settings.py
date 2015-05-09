@@ -89,5 +89,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'mp3s')
 MEDIA_URL = '/mp3/'
 
 ARTIST_DONATE_ADDRESS_SOURCE = 'musicstation.tips'
+SERVE_ADDRESSES = False
 
 from local_settings import *

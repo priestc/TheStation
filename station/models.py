@@ -32,6 +32,7 @@ class Song(models.Model):
     subgenre= models.TextField(blank=True)
     recorded_date = models.DateField()
     featuring = models.ManyToManyField('station.Artist', through='station.Feature', blank=True)
+    retired = models.BooleanField(default=False)
 
     mp3 = models.FileField(null=True, blank=True)
 
