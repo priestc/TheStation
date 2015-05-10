@@ -57,13 +57,15 @@
     <div id="last_played_container"></div>
     <small>
         Powered by <a href="http://github.com/priestc/TheStation">TheStation</a><br>
-        Bandwidth and Artist monetization provided by <a href="http://autotip.io">Autotip</a>
+        Bandwidth and Artist monetization provided by <a href="http://autotip.io">Autotip</a><br>
+        <a href="#" id='station_stats'>Station Stats</a>
     </small>
 </div>
 
 <script type="text/javascript" src="{{ STATIC_URL }}admin/js/jquery.js"></script>
 
 <script>
+    var station_stats_url = '{% url "station_stats" %}';
     var enable_skip_ahead = {{ SKIP_AHEAD|lower }}; {# either true or false #}
 </script>
 

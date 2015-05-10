@@ -84,7 +84,7 @@ def upload(request):
 def get_artist_donate_address(request):
     """
     Most likely this view is being called by another installation of TheStation
-    We return the donate address f the artist passed in.
+    We return the donate address of the artist passed in.
     """
     if not settings.SERVE_ADDRESSES:
         raise HttpResponseForbidden("Not enabled")
@@ -99,4 +99,13 @@ def get_artist_donate_address(request):
     return JsonResponse({
         'donate_address': artist.address,
         'verified': artist.is_verified()
+    })
+
+def station_stats(request):
+    return JsonResponse({
+        'average_bitrate_kbps': StationPlay.average_bandwidth_kbps(),
+        'average_duration_minutes': StationPlay.average_duration_minutes(),
+        'average_bytes_per_song': StationPlay.average_bytes_per_song(),
+        'cost_per_song_per_user_usd': StationPlay.cost_per_song_per_user_usd(),
+        'cost_per_minute_per_user_usd': StationPlay.cost_per_minute_per_user_usd()
     })

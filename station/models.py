@@ -44,11 +44,21 @@ class Song(models.Model):
     def __unicode__(self):
         return "%s - %s%s" % (self.artist.name, self.title, self.feat())
 
+    @classmethod
+    def eligible_for_broadcast(cls):
+        """
+        Returns a queryset of all songs that have mp3, cover and are no retired.
+        """
+        return cls.objects.exclude(mp3='').exclude(image='').exclude(retired=True)
+
     def fetch_from_lastfm(self):
         url = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=%s&artist=%s&track=%s&format=json" % (
             settings.LASTFM_KEY, self.artist.name, "%s %s" % (self.title, self.feat)
         )
         return requests.get(url).json()
+
+    def year(self):
+        return self.recorded_date.strftime("%Y")
 
     def fetch_img(self):
         response = self.fetch_from_lastfm()
@@ -139,6 +149,10 @@ class Song(models.Model):
         if self.collection and last_song.collection == self.collection:
             return False
 
+        if self.year[:3] == last_song.year[:3]:
+            # same decade
+            return False
+
         title_repeat = int(Song.objects.count() / 2)
         artist_repeat = int(Artist.objects.count() / 3)
 
@@ -212,7 +226,9 @@ class StationPlay(models.Model):
         """
         Returns the average kilobits per second for all songs in the library.
         """
-        data = [x.estimate_bitrate_kbps() for x in Song.objects.all()]
+        data = [x.estimate_bitrate_kbps() for x in Song.eligible_for_broadcast()]
+        if not len(data):
+            return 0
         return sum(data) / len(data)
 
     @classmethod
@@ -220,7 +236,9 @@ class StationPlay(models.Model):
         """
         Calculate the average number of minutes each song is in the song library.
         """
-        data = [x.duration.total_seconds() for x in Song.objects.all()]
+        data = [x.duration.total_seconds() for x in Song.eligible_for_broadcast()]
+        if not len(data):
+            return 0
         return sum(data) / len(data) / 60
 
     @classmethod
@@ -228,13 +246,21 @@ class StationPlay(models.Model):
         """
         The Average bytes of bandwidth used per song.
         """
-        return (cls.average_bandwidth_kbps() * 60 * 8) * cls.average_duration_minutes()
+        bytes_per_minute = cls.average_bandwidth_kbps() * 60 * 8
+        return bytes_per_minute * cls.average_duration_minutes()
 
     @classmethod
     def cost_per_song_per_user_usd(cls):
         gb_per_song = cls.average_bytes_per_song() / 1024 / 1024 / 1024
         cost_per_gb = 0.09 # according to Amazon S3 pricing page.
         return gb_per_song * cost_per_gb
+
+    @classmethod
+    def cost_per_minute_per_user_usd(cls):
+        bytes_per_minute = cls.average_bandwidth_kbps() * 60 * 8
+        gb_per_minute = bytes_per_minute / 1024 / 1024 / 1024
+        cost_per_gb = 0.09 # according to Amazon S3 pricing page.
+        return gb_per_minute * cost_per_gb
 
     @classmethod
     def generate_next(cls, last_end):
@@ -244,7 +270,7 @@ class StationPlay(models.Model):
             # this is the first song of this station's history. Generate a
             # previous song to satisify the algorithm.
             now = datetime.datetime.now(pytz.utc)
-            one_time_random_song = Song.objects.order_by("?")[0]
+            one_time_random_song = Song.eligible_for_broadcast().order_by("?")[0]
             last_play = StationPlay.objects.create(
                 song=one_time_random_song,
                 start_time=now - (one_time_random_song.duration + datetime.timedelta(seconds=SONG_PADDING)),
@@ -252,7 +278,7 @@ class StationPlay(models.Model):
             )
             last_song = last_play.song
 
-        random_songs = Song.objects.exclude(mp3='').order_by("?")
+        random_songs = Song.eligible_for_broadcast().order_by("?")
         j = 0
 
         chosen_song = None
@@ -263,6 +289,7 @@ class StationPlay(models.Model):
                 break;
         else:
             # no eligible songs, return any song, except the one that was just played
+            print "Exhausted eligible songs, next play will not follow station mixing rules."
             for j, random_song in enumerate(random_songs):
                 if random_song != last_song:
                     chosen_song = random_song

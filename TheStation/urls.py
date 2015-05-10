@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^play$', views.player, {'autoplay': True}, name="autoplay"),
     url(r'^get_artist_donate_address$', views.get_artist_donate_address, name="get_artist_donate_address"),
     url(r'^upload$', views.upload, name="upload"),
+    url(r'^stats$', views.station_stats, name='station_stats'),
 ]
 
 if settings.DEBUG:
