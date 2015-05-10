@@ -2,8 +2,7 @@ import datetime
 import pytz
 
 from django.contrib import admin
-
-# Register your models here.
+from django.conf import settings
 
 from .models import Artist, Song, StationPlay, Feature
 from .forms import SongFormImageURL
@@ -12,11 +11,15 @@ class FeatureInline(admin.TabularInline):
     model = Feature
 
 
-def generate_address(modeladmin, request, queryset):
+def donate_address(modeladmin, request, queryset):
     for artist in queryset:
         if not artist.address:
             artist.generate_address()
 
+if settings.ARTIST_DONATE_ADDRESS_SOURCE:
+    donate_address.short_description = "Fetch Donate Address"
+else:
+    donate_address.short_description = "Generate Donate Address"
 
 def fetch_album_art(modeladmin, request, queryset):
     for song in queryset:
@@ -28,7 +31,7 @@ def fetch_album_art(modeladmin, request, queryset):
 
 class ArtistAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'song_count', 'play_count')
-    actions = [generate_address]
+    actions = [donate_address]
     exclude = ('private_key_hex', )
     search_fields = ('name', )
     #readonly_fields = ('private_key_wif', )

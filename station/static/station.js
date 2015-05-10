@@ -36,6 +36,7 @@ $("#stop").click(function() {
     $("#start2").show();
     $(this).hide();
     $("#mute").hide();
+    $("#unmute").hide();
     $("#currently_playing").addClass("grayed");
     $("#currently_playing .status").text("Not Streaming");
 });

@@ -3,7 +3,7 @@
 {% block content %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="microtip" content="Audio">
-<meta name="microtip" content="1BoYSGVTHL9ERrFgSk9wDu9GsRUKABdTRc" data-recipient="Bandwidth Fund">
+<meta name="microtip" content="{{ BANDWIDTH_FUND_ADDRESS }}" data-recipient="{{ TITLE|striptags }} Bandwidth Fund">
 <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}station.css">
 
 <div class="center">
@@ -23,7 +23,8 @@
     </div>
     <br>
 
-    <div id="next_song"></div>
+    <div id="next_song">
+    </div>
     <br>
     <br>
     <div id="currently_playing" class="grayed pbg-0">
@@ -38,7 +39,18 @@
         <span class='start_time'>{{ current_play.start_time }}</span>
         <progress value='0' max='1' style='width: 80%'></progress>
     </div>
-    <div id="currently_playing_cache" style="display: none"></div>
+    <div id="currently_playing_cache" style="display: none">
+        <span class="status">Not Currently Streaming</span><br><br>
+        <span class="mp3src">{{ next_play.url }}</span>
+        <span class="tips">{{ next_play_tips_json }}</span>
+        <img src='{{ next_play.img }}'><br>
+        <span class='artist'>{{ next_play.artist }}</span>
+        [<span class='year'>{{ next_play.year }}</span>]
+        <span class='title'>{{ next_play.title }}</span>
+        <span class='duration'>{{ next_play.duration }}</span>
+        <span class='start_time'>{{ next_play.start_time }}</span>
+        <progress value='0' max='1' style='width: 80%'></progress>
+    </div>
     <br>
     <br>
     <div id="last_played_header" style="display:none">Play History:</div>
@@ -73,7 +85,9 @@
     console.log("HOME PAGE: scheduling switch to {{ next_play.artist|safe }} {{ next_play.title|safe }} for", next_start, "in", ms_to_start / 1000, "seconds")
     setTimeout(switch_song, ms_to_start, {{ next_play_json|safe }});
 
+    {% if autoplay %}
     setTimeout(make_random_background, (ms_to_start - 5000));
+    {% endif %}
 
 </script>
 

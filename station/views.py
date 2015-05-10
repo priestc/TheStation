@@ -58,6 +58,7 @@ def player(request, autoplay=False):
         'next_play': next_play.as_dict(),
         'autoplay': autoplay,
         'TITLE': settings.TITLE,
+        'BANDWIDTH_FUND_ADDRESS': settings.BANDWIDTH_FUND_ADDRESS,
         'next_fetch': next_fetch,
         'next_play_json': json.dumps(next_play.as_dict()), # django should have a built-in json template tag
         'current_play_tips_json': json.dumps(current_play.as_dict()['tips']),
