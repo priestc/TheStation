@@ -58,6 +58,7 @@ class Song(models.Model):
         )
         return requests.get(url).json()
 
+    @property
     def year(self):
         return self.recorded_date.strftime("%Y")
 
