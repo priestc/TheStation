@@ -33,6 +33,7 @@ class Song(models.Model):
     recorded_date = models.DateField()
     featuring = models.ManyToManyField('station.Artist', through='station.Feature', blank=True)
     retired = models.BooleanField(default=False)
+    mp3filesize = models.IntegerField(default=None, null=True, blank=True)
 
     mp3 = models.FileField(null=True, blank=True)
 
@@ -93,9 +94,9 @@ class Song(models.Model):
     def estimate_bitrate_kbps(self):
         """
         Calculate approximate bitrate based on filesize and duration.
-        Returns a number that is kilobits / second.
+        Returns a number that is kilobits per second.
         """
-        return ((self.mp3.size / 1024) * 8) / self.duration.total_seconds()
+        return (((self.mp3filesize or 0) / 1024) * 8) / self.duration.total_seconds()
 
     def get_tips(self):
         """
@@ -165,6 +166,11 @@ class Song(models.Model):
             return False
         return True
 
+def migrate_mp3ilesize():
+    for s in Song.objects.all():
+        s.mp3filesize = s.mp3.size
+        s.save()
+        print s.estimate_bitrate_kbps()
 
 class Artist(models.Model):
     name = models.TextField(unique=True)
