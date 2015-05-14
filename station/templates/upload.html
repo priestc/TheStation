@@ -81,13 +81,15 @@
         });
 
         $("#id_mp3").change(function(event) {
-            musicmetadata($(this)[0].files[0], {duration: true}, function(err, result) {
+            var file = this.files[0];
+            musicmetadata(file, {duration: true}, function(err, result) {
                 $("#id_title").val(result.title);
                 $("#id_artist").val(result.artist[0]);
                 $("#id_collection").val(result.album);
                 $("#id_recorded_date").val(result.year + "-01-01");
                 $("#id_duration").val(to_ms(result.duration));
                 $("#id_image_url").val("Fetching...");
+                $("#id_mp3filesize").val(file.size)
 
                 get_image(result.artist[0], result.title);
 
