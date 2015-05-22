@@ -253,8 +253,10 @@ class StationPlay(models.Model):
         """
         The Average bytes of bandwidth used per song.
         """
-        bytes_per_minute = cls.average_bandwidth_kbps() * 60 * 8
-        return bytes_per_minute * cls.average_duration_minutes()
+        data = [x.mp3filesize for x in Song.eligible_for_broadcast()]
+        if not len(data):
+            return 0
+        return sum(data) / len(data)
 
     @classmethod
     def cost_per_song_per_user_usd(cls):
@@ -321,5 +323,6 @@ class StationPlay(models.Model):
             'duration': self.song.duration.total_seconds(),
             'url': self.song.mp3.url,
             'year': self.song.recorded_date.strftime("%Y"),
-            "img": self.song.image.url
+            "img": self.song.image.url,
+            'id': self.ordinal
         }

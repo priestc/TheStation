@@ -80,6 +80,10 @@ h1 {
     display: none;
 }
 
+#currently_playing .play-id {
+    display: none;
+}
+
 #currently_playing .mp3src {
     display: none;
 }

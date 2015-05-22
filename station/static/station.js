@@ -1,16 +1,36 @@
 var all_voices = window.speechSynthesis.getVoices();
 
 function make_bumper(words) {
-    $('#player').animate({volume: 0.1}, 500);
+    $('#playerA, #playerB').animate({volume: 0.1}, 500);
     var msg = new SpeechSynthesisUtterance(words);
     var this_hour = (new Date()).getHours();
     msg.voice = all_voices[this_hour];
     msg.onend = function() {
         // after speech is over, bring volume back
-        $('#player').animate({volume: 1.0}, 500);
+        $('#playerA, #playerB').animate({volume: 1.0}, 500);
     }
     window.speechSynthesis.speak(msg);
 }
+
+$("#stats_link").click(function(event) {
+    event.preventDefault();
+
+    $.get("/stats").complete(function(response) {
+        var data = response.responseJSON;
+        var abps = data.average_bytes_per_song;
+        var bcpm = data.bandwidth_cost_per_minute_usd * 1000;
+        var bcps = data.bandwidth_cost_per_song_usd * 1000;
+
+        $("#stats_display").show();
+        $("#stats_display .total_songs").text(data.total_songs);
+        $("#stats_display .average_bitrate_kbps").text(data.average_bitrate_kbps.toFixed(0));
+        $("#stats_display .average_duration_minutes").text(data.average_duration_minutes.toFixed(2));
+        $("#stats_display .average_bytes_per_song").text((abps / 1024 / 1024).toFixed(2));
+        $("#stats_display .bandwidth_cost_per_song_usd").text(bcps.toFixed(2));
+        $("#stats_display .bandwidth_cost_per_minute_usd").text(bcpm.toFixed(2));
+
+    });
+});
 
 function miliseconds_from_now(some_date) {
     // passed in must be an instance of Date.
@@ -19,19 +39,22 @@ function miliseconds_from_now(some_date) {
 
 $("#mute").click(function() {
     $(this).hide();
-    $('#player').get(0).volume = 0.01;
+    $('#playerA').get(0).volume = 0.01;
+    $('#playerB').get(0).volume = 0.01;
     $("#unmute").show();
 });
 
 $("#unmute").click(function() {
     $(this).hide();
-    $('#player').get(0).volume = 1.0;
+    $('#playerA').get(0).volume = 1.0;
+    $('#playerB').get(0).volume = 1.0;
     $("#mute").show();
 });
 
 var stream_enabled = false;
 $("#stop").click(function() {
-    $('#player').get(0).pause();
+    $('#playerA').get(0).pause();
+    $('#playerB').get(0).pause();
     stream_enabled = false;
     $("#start2").show();
     $(this).hide();
@@ -52,12 +75,12 @@ $("#start").click(function(event) {
     make_random_background();
 });
 
-$("#player").on('timeupdate', function() {
+$("#playerA, #playerB").on('timeupdate', function() {
     // update the seek bar as the song plays.
     $('progress').attr("value", this.currentTime / this.duration);
 });
 
-$("#player").on('ended', function() {
+$("#playerA, #playerB").on('ended', function() {
     // when a song ends, add it to the play history section.
     // there is a one second gap between the last song ending
     // and the next song starting. During that gap, the "current
@@ -84,11 +107,18 @@ function start_playing_song() {
     // either at the begining of the song, or while it is in progress.
 
     if(stream_enabled) {
-        var player = $("#player");
-        player.text($("#currently_playing .tips").text());
+        var play_id = Number($("#currently_playing .play-id").text());
+        if(play_id % 2 == 0) {
+            var new_player = $("#playerA");
+            var old_player = $("#playerB");
+        } else {
+            var new_player = $("#playerB");
+            var old_player = $("#playerA");
+        }
         $("#currently_playing .status").text("Currently Streaming");
-        player.attr("src", $("#currently_playing .mp3src").text());
-        player.get(0).play();
+        new_player.get(0).play();
+        new_player.get(0).volume = 1.00;
+        old_player.get(0).volume = 0.01;
     } else {
         console.log("not playing sound or loading mp3 because not started");
     }
@@ -107,20 +137,16 @@ function start_playing_song() {
     );
 
     var ticked = false;
-    if(seconds_in_progress > 10 && enable_skip_ahead) {
-        // song was supposed to start more than 10 seconds ago. Skip ahead
-        // to the correct time
-        $('#player').on('canplay', function() {
-            if(!ticked) {
-                // calculate again to account for the time it takes to load
-                // the fist few frames
-                var seconds_in_progress = -1 * miliseconds_from_now(start_time) / 1000;
-                console.log("skipping ahead to " + seconds_in_progress);
-                this.currentTime = seconds_in_progress;
-                ticked = true;
-            }
-        });
-    }
+    new_player.on('canplay', function() {
+        if(!ticked) {
+            // calculate again to account for the time it takes to load
+            // the fist few frames
+            var seconds_in_progress = -1 * miliseconds_from_now(start_time) / 1000;
+            console.log("skipping ahead to " + seconds_in_progress);
+            this.currentTime = seconds_in_progress;
+            ticked = true;
+        }
+    });
 }
 
 function make_currently_playing(song, element) {
@@ -131,16 +157,26 @@ function make_currently_playing(song, element) {
     var preload = stream_enabled ? "auto" : "none";
     var status = stream_enabled ? "Currently Streaming" : "Not Currently Streaming";
 
+    if(song.id % 2 == 0) {
+        // even song, use player A
+        var player = $("#playerA")
+    } else {
+        // odd song, use player B
+        var player = $("#playerB")
+    }
+
+    player.text(JSON.stringify(song.tips));
+    player.attr('src', song.url)
+
     element.html("<span class='status'>" + status + "</span><br><br>"
-        + "<span class='mp3src'>" + song.url + "</span>"
-        + "<span class='tips'>" + JSON.stringify(song.tips) + "</span>"
         + "<img src='" + song.img + "'><br>"
         + "<span class='artist'>" + song.artist + "</span> "
         + "[<span class='year'>" + song.year + "</span>] "
-        + "<span class='title'>" + song.title + "</span>"
+        + "<span class='title'>" + song.title + "</span><br>"
+        + "<span class='play-id'>" + song.id + "</span>"
         + "<span class='start_time'>" + song.start_time + "</span>"
         + "<span class='duration'>" + song.duration + "</span>"
-        + "<br><progress value='0' max='1' style='width: 80%'></progress>"
+        + "<progress value='0' max='1' style='width: 80%'></progress>"
     );
 }
 

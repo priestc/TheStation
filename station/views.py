@@ -103,9 +103,10 @@ def get_artist_donate_address(request):
 
 def station_stats(request):
     return JsonResponse({
+        'total_songs': Song.eligible_for_broadcast().count(),
         'average_bitrate_kbps': StationPlay.average_bandwidth_kbps(),
         'average_duration_minutes': StationPlay.average_duration_minutes(),
         'average_bytes_per_song': StationPlay.average_bytes_per_song(),
-        'cost_per_song_per_user_usd': StationPlay.cost_per_song_per_user_usd(),
-        'cost_per_minute_per_user_usd': StationPlay.cost_per_minute_per_user_usd()
+        'bandwidth_cost_per_song_usd': StationPlay.cost_per_song_per_user_usd(),
+        'bandwidth_cost_per_minute_usd': StationPlay.cost_per_minute_per_user_usd()
     })

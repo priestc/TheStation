@@ -8,9 +8,11 @@
 
 <div class="center">
     {% if autoplay %}
-    <audio id="player" src='{{ currently_play.song.url }}' preload='auto'></audio>
+    <audio id="player{% if current_play.id|divisibleby:"2" %}A{% else %}B{% endif%}" src='{{ current_play.url }}' preload='auto'></audio>
+    <audio id="player{% if next_play.id|divisibleby:"2" %}A{% else %}B{% endif%}" src='{{ next_play.url }}' preload='auto'></audio>
     {% else %}
-    <audio id="player" preload='none'></audio>
+    <audio id="playerA" preload='none'></audio>
+    <audio id="playerB" preload='none'></audio>
     {% endif %}
 
     <h1>{{ TITLE|default:"The Station"|safe }}</h1>
@@ -34,7 +36,8 @@
         <img src='{{ current_play.img }}'><br>
         <span class='artist'>{{ current_play.artist }}</span>
         [<span class='year'>{{ current_play.year }}</span>]
-        <span class='title'>{{ current_play.title }}</span>
+        <span class='title'>{{ current_play.title }}</span><br>
+        <span class='play-id'>{{ current_play.id }}</span>
         <span class='duration'>{{ current_play.duration }}</span>
         <span class='start_time'>{{ current_play.start_time }}</span>
         <progress value='0' max='1' style='width: 80%'></progress>
@@ -46,7 +49,8 @@
         <img src='{{ next_play.img }}'><br>
         <span class='artist'>{{ next_play.artist }}</span>
         [<span class='year'>{{ next_play.year }}</span>]
-        <span class='title'>{{ next_play.title }}</span>
+        <span class='title'>{{ next_play.title }}</span><br>
+        <span class='play-id'>{{ next_play.id }}</span>
         <span class='duration'>{{ next_play.duration }}</span>
         <span class='start_time'>{{ next_play.start_time }}</span>
         <progress value='0' max='1' style='width: 80%'></progress>
@@ -58,7 +62,16 @@
     <small>
         Powered by <a href="http://github.com/priestc/TheStation">TheStation</a><br>
         Bandwidth and Artist monetization provided by <a href="http://autotip.io">Autotip</a><br>
-        <a href="#" id='station_stats'>Station Stats</a>
+        <a href="#" id='stats_link'>Station Stats</a>
+        <div id="stats_display" style="display: none">
+            Total number of songs in library: <strong class="total_songs"></strong><br>
+            Average bitrate of all songs: <strong class="average_bitrate_kbps"></strong> kbps<br>
+            Average duration of each song: <strong class="average_duration_minutes"></strong> minutes<br>
+            Average bandwidth used per song:<strong class="average_bytes_per_song"></strong> MB<br>
+            Average bandwidth used per minute: <strong class="bandwidth_per_minute"></strong><br>
+            Bandwidth Cost per song: $<strong class="bandwidth_cost_per_song_usd"></strong> USD<br>
+            Bandwidth Cost per minute: $<strong class="bandwidth_cost_per_minute_usd"></strong> USD<br>
+        </div>
     </small>
 </div>
 
