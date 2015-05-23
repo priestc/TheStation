@@ -152,21 +152,22 @@ function start_playing_song() {
 function make_currently_playing(song, element) {
     // song = object that comes from next_song or current_song (API call)
     // element = the element we write this info to. can be either the
-    // visible one or the hidden one (for cache).
+    // visible one (currently playing) or the hidden one (next song) (for cache).
 
     var preload = stream_enabled ? "auto" : "none";
     var status = stream_enabled ? "Currently Streaming" : "Not Currently Streaming";
 
     if(song.id % 2 == 0) {
         // even song, use player A
-        var player = $("#playerA")
+        var player = $("#playerA");
     } else {
         // odd song, use player B
-        var player = $("#playerB")
+        var player = $("#playerB");
     }
 
     player.text(JSON.stringify(song.tips));
-    player.attr('src', song.url)
+    player.attr('src', song.url);
+    player.attr('preload', preload);
 
     element.html("<span class='status'>" + status + "</span><br><br>"
         + "<img src='" + song.img + "'><br>"
