@@ -23,8 +23,9 @@ hearing the same song.
 
 Make a new server.
 
-In the home folder, clone the repo.
+In your home folder, clone the repo.
 
+    cd ~
     git clone git@github.com:priestc/TheStation.git
 
 Install postgres and then make the database:
@@ -40,8 +41,12 @@ Now install nginx and uwsgi on this server. If you are on ubuntu, you'd do:
 
     sudo apt-get install uwsgi nginx
 
-Install the uwsgi conf file into the uwsifolder, and move the nginx conf into
-the nginx folder.
+Install the uwsgi conf file into the uwsgi `apps-enabled` folder,
+and move the nginx conf into the nginx `sites-enabled` folder.
+
+    ln -s ~/TheStation/thestation-uwsgi.conf /etc/uwsgi/apps-enabled
+    ln -s ~/TheStation/thestation-nginx.conf /etc/nginx/sites-enabled
 
 Restart nginx and uwsgi. Now go to the server's IP in your browser.
-You should see the station page. You can no
+You should see the station page. You can now upload songs from the /upload url
+in your browser.
