@@ -44,7 +44,7 @@ Now install nginx and uwsgi on this server. If you are on ubuntu, you'd do:
 Install the uwsgi conf file into the uwsgi `apps-enabled` folder,
 and move the nginx conf into the nginx `sites-enabled` folder.
 
-    ln -s ~/TheStation/thestation-uwsgi.conf /etc/uwsgi/apps-enabled
+    ln -s ~/TheStation/thestation-uwsgi.yaml /etc/uwsgi/apps-enabled
     ln -s ~/TheStation/thestation-nginx.conf /etc/nginx/sites-enabled
 
 Restart nginx and uwsgi. Now go to the server's IP in your browser.

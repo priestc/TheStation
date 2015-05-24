@@ -1,0 +1,13 @@
+uwsgi:
+    master: true
+    processes: 5
+    vaccum: true
+    gid: ubuntu
+    uid: ubuntu
+    chmod-socket: 666
+    plugins: python
+    socket: /tmp/musicstation.sock
+    chdir: /home/ubuntu/TheStation
+    pythonpath: /home/ubuntu/TheStation/TheStation/
+    module: wsgi:application
+    touch-reload: /home/ubuntu/TheStation/TheStation/wsgi.py
