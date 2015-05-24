@@ -1,11 +1,11 @@
 # TheStation
 
-Overview
-========
+## Overview
 
 The Station is a software package for managing an online radio station.
 
 It includes:
+
     * A station listen page where you can listen to the station
     * An upload form with Last.FM support for getting album art.
     * Autotip support, so listeners can send bitcoin tips to the artist of the
@@ -18,3 +18,30 @@ playing the same artist or genre over and over again.
 
 The music stream is synchronized. All listeners who listen to the stream are
 hearing the same song.
+
+## Installation
+
+Make a new server.
+
+In the home folder, clone the repo.
+
+    git clone git@github.com:priestc/TheStation.git
+
+Install postgres and then make the database:
+
+    sudo apt-get install postgresql
+    createdb thestation
+
+Run the migration script to get started:
+
+    ./manage.py migrate
+
+Now install nginx and uwsgi on this server. If you are on ubuntu, you'd do:
+
+    sudo apt-get install uwsgi nginx
+
+Install the uwsgi conf file into the uwsifolder, and move the nginx conf into
+the nginx folder.
+
+Restart nginx and uwsgi. Now go to the server's IP in your browser.
+You should see the station page. You can no
