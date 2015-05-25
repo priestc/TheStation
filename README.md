@@ -63,8 +63,7 @@ Restart nginx and uwsgi. Now go to the server's IP in your browser.
 You should see the station page. You can now upload songs from the /upload url
 in your browser.
 
-
-# Local Settings
+## Local Settings
 
 The file `local_settings.py` contains a bunch of variables that you an modify.
 They are as follows:

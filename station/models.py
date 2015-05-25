@@ -256,20 +256,28 @@ class StationPlay(models.Model):
         data = [x.mp3filesize for x in Song.eligible_for_broadcast()]
         if not len(data):
             return 0
-        return sum(data) / len(data)
+        return int(sum(data) / len(data))
+
+    @classmethod
+    def average_bytes_per_minute(cls):
+        """
+        The Average bytes of bandwidth used per song.
+        """
+        bytes_per_song = cls.average_bytes_per_song()
+        minutes_per_song = cls.average_duration_minutes()
+        return int(bytes_per_song / minutes_per_song)
 
     @classmethod
     def cost_per_song_per_user_usd(cls):
-        gb_per_song = cls.average_bytes_per_song() / 1024 / 1024 / 1024
+        gb_per_song = cls.average_bytes_per_song() / 1024.0 / 1024.0 / 1024.0
         cost_per_gb = 0.09 # according to Amazon S3 pricing page.
         return gb_per_song * cost_per_gb
 
     @classmethod
     def cost_per_minute_per_user_usd(cls):
-        bytes_per_minute = cls.average_bandwidth_kbps() * 60 * 8
-        gb_per_minute = bytes_per_minute / 1024 / 1024 / 1024
-        cost_per_gb = 0.09 # according to Amazon S3 pricing page.
-        return gb_per_minute * cost_per_gb
+        cost_per_song = cls.cost_per_song_per_user_usd()
+        minutes_per_song = cls.average_duration_minutes()
+        return cost_per_song / minutes_per_song
 
     @classmethod
     def generate_next(cls, last_end):
@@ -323,6 +331,6 @@ class StationPlay(models.Model):
             'duration': self.song.duration.total_seconds(),
             'url': self.song.mp3.url,
             'year': self.song.recorded_date.strftime("%Y"),
-            "img": self.song.image.url,
+            'img': self.song.image.url,
             'id': self.ordinal
         }

@@ -62,7 +62,6 @@ def player(request, autoplay=False):
         'next_fetch': next_fetch,
         'next_play_json': json.dumps(next_play.as_dict()), # django should have a built-in json template tag
         'current_play_tips_json': json.dumps(current_play.as_dict()['tips']),
-        'SKIP_AHEAD': settings.SKIP_AHEAD
     })
 
 @login_required
@@ -107,6 +106,7 @@ def station_stats(request):
         'average_bitrate_kbps': StationPlay.average_bandwidth_kbps(),
         'average_duration_minutes': StationPlay.average_duration_minutes(),
         'average_bytes_per_song': StationPlay.average_bytes_per_song(),
+        'average_bytes_per_minute': StationPlay.average_bytes_per_minute(),
         'bandwidth_cost_per_song_usd': StationPlay.cost_per_song_per_user_usd(),
         'bandwidth_cost_per_minute_usd': StationPlay.cost_per_minute_per_user_usd()
     })

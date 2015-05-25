@@ -90,16 +90,29 @@ h1 {
 
 #currently_playing img {
     height: 300px;
+    width: 300px;
 }
 
 .center {
     padding: 10px;
-    width: 100%;
-    max-width: 500px;
+    width: 500px;
     background: #f2f2f2;
     border: 1px solid gray;
     font-family: verdana;
     margin: 0 auto;
+}
+
+@media screen and (max-width: 300px) {
+    /* MOBILE */
+    .center {
+        padding: 10px;
+        width: 100%;
+        max-width: 500px;
+        background: #f2f2f2;
+        border: 1px solid gray;
+        font-family: verdana;
+        margin: 0 auto;
+    }
 }
 
 .buttons {

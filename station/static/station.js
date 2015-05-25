@@ -18,16 +18,18 @@ $("#stats_link").click(function(event) {
     $.get("/stats").complete(function(response) {
         var data = response.responseJSON;
         var abps = data.average_bytes_per_song;
-        var bcpm = data.bandwidth_cost_per_minute_usd * 1000;
-        var bcps = data.bandwidth_cost_per_song_usd * 1000;
+        var abpm = data.average_bytes_per_minute;
+        var bcpm = data.bandwidth_cost_per_minute_usd;
+        var bcps = data.bandwidth_cost_per_song_usd;
 
         $("#stats_display").show();
         $("#stats_display .total_songs").text(data.total_songs);
         $("#stats_display .average_bitrate_kbps").text(data.average_bitrate_kbps.toFixed(0));
         $("#stats_display .average_duration_minutes").text(data.average_duration_minutes.toFixed(2));
         $("#stats_display .average_bytes_per_song").text((abps / 1024 / 1024).toFixed(2));
-        $("#stats_display .bandwidth_cost_per_song_usd").text(bcps.toFixed(2));
-        $("#stats_display .bandwidth_cost_per_minute_usd").text(bcpm.toFixed(2));
+        $("#stats_display .average_bytes_per_minute").text((abpm / 1024 / 1024).toFixed(2));
+        $("#stats_display .bandwidth_cost_per_song_usd").text(bcps.toFixed(4));
+        $("#stats_display .bandwidth_cost_per_minute_usd").text(bcpm.toFixed(4));
 
     });
 });
