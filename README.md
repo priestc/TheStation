@@ -37,9 +37,14 @@ Install postgres and then make the database:
     sudo apt-get install postgresql
     createdb thestation
 
+Install python dependencies:
+
+    sudo apt-get install python-pip
+    sudo pip install -r ~/TheStation/requirements.txt
+
 Run the migration script to get started:
 
-    ./manage.py migrate
+    python ~/TheStation/manage.py migrate
 
 Modify the `local_settings.py` file with your Amazon S3 credentials. See the
 section below for full instructions of all settings you can tweak.
@@ -49,7 +54,7 @@ Now install nginx and uwsgi on this server. If you are on ubuntu, you'd do:
     sudo apt-get install uwsgi nginx
 
 Install the uwsgi conf file into the uwsgi `apps-enabled` folder,
-and move the nginx conf into the nginx `sites-enabled` folder.
+and move the nginx conf into the nginx `sites-enabled` folder:
 
     ln -s ~/TheStation/thestation-uwsgi.yaml /etc/uwsgi/apps-enabled
     ln -s ~/TheStation/thestation-nginx.conf /etc/nginx/sites-enabled
