@@ -69,13 +69,13 @@ in your browser.
 The file `local_settings.py` contains a bunch of variables that you an modify.
 They are as follows:
 
-    * `LASTFM_KEY`: 32 char string. You can get an Last.FM API key from
-       signing up at last.fm. This is used to get album at info on the upload page.
+* `LASTFM_KEY`: 32 char string. You can get an Last.FM API key from
+signing up at last.fm. This is used to get album at info on the upload page.
 
-    * `TITLE`: A string containng the title of your station. This string should
-       contain HTML. When all HTML tags are stripped, there should still be the title
-       in words. In other words, this value needs to be text, not just an `img` tag,
-       for instance.
+* `TITLE`: A string containng the title of your station. This string should
+contain HTML. When all HTML tags are stripped, there should still be the title
+in words. In other words, this value needs to be text, not just an `img` tag,
+for instance.
 
-    * `BANDWIDTH_FUND_ADDRESS`: A bitcoin address for users to donate to for bandwidth.
-       This should be the public key.
+* `BANDWIDTH_FUND_ADDRESS`: A bitcoin address for users to donate to for bandwidth.
+This should be the public key.
