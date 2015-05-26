@@ -29,6 +29,7 @@ class SongFormImageURL(forms.ModelForm):
             'genre': forms.TextInput,
             'subgenre': forms.TextInput,
             'title': forms.TextInput,
+            'mp3filesize': forms.HiddenInput
         }
 
 class UploadSongForm(SongFormImageURL):

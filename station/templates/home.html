@@ -83,7 +83,7 @@
 
 <script>
     var station_stats_url = '{% url "station_stats" %}';
-    var enable_skip_ahead = {{ SKIP_AHEAD|lower }}; {# either true or false #}
+    var skip_ahead = true;
 </script>
 
 <script src="{{ STATIC_URL}}station.js"></script>
