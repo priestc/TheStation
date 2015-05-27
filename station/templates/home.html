@@ -7,13 +7,8 @@
 <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}station.css">
 
 <div class="center">
-    {% if autoplay %}
-    <audio id="player{% if current_play.id|divisibleby:"2" %}A{% else %}B{% endif%}" src='{{ current_play.url }}' preload='auto'></audio>
-    <audio id="player{% if next_play.id|divisibleby:"2" %}A{% else %}B{% endif%}" src='{{ next_play.url }}' preload='auto'></audio>
-    {% else %}
-    <audio id="playerA" preload='none'></audio>
-    <audio id="playerB" preload='none'></audio>
-    {% endif %}
+    <audio id="player{% if current_play.id|divisibleby:"2" %}A{% else %}B{% endif%}" src='{{ current_play.url }}' preload='{% if autoplay %}auto{% else %}none{% endif %}'></audio>
+    <audio id="player{% if next_play.id|divisibleby:"2" %}A{% else %}B{% endif%}" src='{{ next_play.url }}' preload='{% if autoplay %}auto{% else %}none{% endif %}'></audio>
 
     <h1>{{ TITLE|default:"The Station"|safe }}</h1>
 
@@ -22,10 +17,6 @@
         <button id="start2" style="display: none" onclick="window.location = '/play'">Restart</button>
         <button id="start">Start Listening</button>
         <button id="stop" style="display: none">Stop</button>
-    </div>
-    <br>
-
-    <div id="next_song">
     </div>
     <br>
     <br>
@@ -41,7 +32,9 @@
         <span class='duration'>{{ current_play.duration }}</span>
         <span class='start_time'>{{ current_play.start_time }}</span>
         <progress value='0' max='1' style='width: 80%'></progress>
+        <br>
     </div>
+    <div id="next_song"></div>
     <div id="currently_playing_cache" style="display: none">
         <span class="status">Not Currently Streaming</span><br><br>
         <span class="mp3src">{{ next_play.url }}</span>
@@ -83,7 +76,6 @@
 
 <script>
     var station_stats_url = '{% url "station_stats" %}';
-    var skip_ahead = true;
 </script>
 
 <script src="{{ STATIC_URL}}station.js"></script>

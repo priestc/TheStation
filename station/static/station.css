@@ -16,11 +16,6 @@ body {
     margin: 10px;
 }
 
-.title, .artist {
-    font-size: large;
-    font-weight: bold
-}
-
 .error {
     color: red;
     font-size: x-large;
@@ -79,10 +74,14 @@ body {
 
 #currently_playing .artist {
     color: #406FB3;
+    font-size: large;
+    font-weight: bold;
 }
 
 #currently_playing .title {
     color: #CE1E39;
+    font-size: large;
+    font-weight: bold;
 }
 #currently_playing .start_time {
     display: none;
@@ -107,6 +106,12 @@ body {
 #currently_playing img {
     height: 300px;
     width: 300px;
+}
+
+#next_song {
+    text-align: center;
+    width: 100%;
+    font-size: smaller;
 }
 
 .buttons {
