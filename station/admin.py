@@ -86,16 +86,18 @@ class SongAdmin(admin.ModelAdmin):
 
 
 class StationPlayAdmin(admin.ModelAdmin):
-    list_display = ('ordinal', 'playing', 'starttime', 'endtime2', 'identicon', 'song', 'duration', 'played_ago')
+    list_display = ('ordinal', 'playing', 'start_admin', 'end_admin', 'identicon', 'song', 'duration', 'played_ago')
 
     def duration(self, obj):
         return obj.song.duration
 
-    def starttime(self, obj):
-        return obj.start_time.strftime("%B %d %Y %H:%M:%S.%f")
+    def start_admin(self, obj):
+        return obj.start_time.astimezone(pytz.timezone('US/Pacific')).strftime("%B %d %Y %I:%M:%S %p %Z")
+    start_adminshort_description = 'Start'
 
-    def endtime2(self, obj):
-        return obj.end_time.strftime("%B %d %Y %H:%M:%S.%f")
+    def end_admin(self, obj):
+        return obj.end_time.astimezone(pytz.timezone('US/Pacific')).strftime("%B %d %Y %I:%M:%S %p %Z")
+    end_admin.short_description = 'End'
 
     def playing(self, obj):
         return obj.start_time < datetime.datetime.now(pytz.utc) < obj.end_time
