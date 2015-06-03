@@ -103,9 +103,6 @@ class StationPlayAdmin(admin.ModelAdmin):
         return obj.start_time < datetime.datetime.now(pytz.utc) < obj.end_time
     playing.boolean = True
 
-    def played_ago(self, obj):
-        return obj.song.last_played_ago
-
     def identicon(self, obj):
         id = obj.start_time.microsecond
         url = "http://www.gravatar.com/avatar/%s?d=identicon" % id

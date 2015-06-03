@@ -321,6 +321,11 @@ class StationPlay(models.Model):
             end_time=end,
         ), i + j
 
+
+    @property
+    def played_ago(self):
+        return datetime.datetime.now(pytz.utc) - self.start_time
+
     def as_dict(self):
         return {
             'artist': self.song.artist.name,
