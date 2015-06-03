@@ -86,7 +86,7 @@ class SongAdmin(admin.ModelAdmin):
 
 
 class StationPlayAdmin(admin.ModelAdmin):
-    list_display = ('ordinal', 'playing', 'starttime', 'endtime2', 'song', 'duration', 'played_ago')
+    list_display = ('ordinal', 'playing', 'starttime', 'endtime2', 'identicon', 'song', 'duration', 'played_ago')
 
     def duration(self, obj):
         return obj.song.duration
@@ -103,6 +103,12 @@ class StationPlayAdmin(admin.ModelAdmin):
 
     def played_ago(self, obj):
         return obj.song.last_played_ago
+
+    def identicon(self, obj):
+        id = obj.start_time.microsecond
+        url = "http://www.gravatar.com/avatar/%s?d=identicon" % id
+        return "<img src='%s' height=20px>" % url
+    identicon.allow_tags = True
 
 admin.site.register(StationPlay, StationPlayAdmin)
 admin.site.register(Song, SongAdmin)
