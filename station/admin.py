@@ -93,7 +93,7 @@ class StationPlayAdmin(admin.ModelAdmin):
 
     def start_admin(self, obj):
         return obj.start_time.astimezone(pytz.timezone('US/Pacific')).strftime("%B %d %Y %I:%M:%S %p %Z")
-    start_adminshort_description = 'Start'
+    start_admin.short_description = 'Start'
 
     def end_admin(self, obj):
         return obj.end_time.astimezone(pytz.timezone('US/Pacific')).strftime("%B %d %Y %I:%M:%S %p %Z")
