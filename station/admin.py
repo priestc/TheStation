@@ -30,7 +30,7 @@ def fetch_album_art(modeladmin, request, queryset):
 
 
 class ArtistAdmin(admin.ModelAdmin):
-    list_display = ('name', 'address', 'song_count', 'play_count')
+    list_display = ('name', 'address', 'song_count', 'play_count', 'tipped_value')
     actions = [donate_address]
     exclude = ('private_key_hex', )
     search_fields = ('name', )
@@ -41,6 +41,9 @@ class ArtistAdmin(admin.ModelAdmin):
 
     def play_count(self, obj):
         return StationPlay.objects.filter(song__artist=obj).count()
+
+    def tipped_value(self, obj):
+        return "$%.2f" % obj.get_tipped_value()
 
 class SongAdmin(admin.ModelAdmin):
     list_display = (

@@ -12,7 +12,7 @@ from django.core.files.temp import NamedTemporaryFile
 
 from pybitcoin import BitcoinPrivateKey
 from django.conf import settings
-from django.core.cache import get_cache
+from django.core.cache import caches
 
 # seconds to schedule between songs
 SONG_PADDING = 2
@@ -188,10 +188,13 @@ class Artist(models.Model):
         """
         Check the blokchain to see how many tips have been collected.
         """
-        cache = get_cache('default')
+        if not self.address:
+            return 0
+
+        cache = caches['default']
         price = cache.get('btc-price')
         if not price:
-            price, source = get_current_price('btc', 'usd', random=True)
+            price, source = get_current_price('btc', 'usd')
             cache.set('btc-price', price)
 
         status_balance = cache.get(self.address)
