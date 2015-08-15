@@ -43,7 +43,13 @@ class ArtistAdmin(admin.ModelAdmin):
         return StationPlay.objects.filter(song__artist=obj).count()
 
     def tipped_value(self, obj):
-        return "$%.2f" % obj.get_tipped_value()
+        tips = obj.get_tipped_value()
+        if tips > 0:
+            return "<b>$%.2f</b>" % tips
+        else:
+            return "$0"
+    tipped_value.allow_tags = True
+
 
 class SongAdmin(admin.ModelAdmin):
     list_display = (
