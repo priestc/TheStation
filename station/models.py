@@ -3,6 +3,8 @@ import random
 import requests
 import urllib2
 
+from moneywagon import get_address_balance, get_current_price
+
 import pytz
 from django.db import models
 from django.core.files import File
@@ -10,6 +12,7 @@ from django.core.files.temp import NamedTemporaryFile
 
 from pybitcoin import BitcoinPrivateKey
 from django.conf import settings
+from django.core.cache import get_cache
 
 # seconds to schedule between songs
 SONG_PADDING = 2
@@ -180,6 +183,25 @@ class Artist(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def get_tipped_value(self):
+        """
+        Check the blokchain to see how many tips have been collected.
+        """
+        cache = get_cache('default')
+        price = cache.get('btc-price')
+        if not price:
+            price, source = get_current_price('btc', 'usd', random=True)
+            cache.set('btc-price', price)
+
+        status_balance = cache.get(self.address)
+        if not status_balance:
+            balance = get_address_balance('btc', self.address)
+            cache.set(self.address, ['OK', price * balance])
+        else:
+            status, balance = status_balance
+
+        return balance * price
 
     def is_verified(self):
         """

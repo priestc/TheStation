@@ -106,7 +106,7 @@ class StationPlayAdmin(admin.ModelAdmin):
     def identicon(self, obj):
         id = obj.start_time.microsecond
         url = "http://www.gravatar.com/avatar/%s?d=identicon" % id
-        return "<img src='%s' height=20px>" % url
+        return "<img src='%s' height='20px'>" % url
     identicon.allow_tags = True
 
 admin.site.register(StationPlay, StationPlayAdmin)
