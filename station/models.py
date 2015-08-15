@@ -200,7 +200,7 @@ class Artist(models.Model):
         status_balance = cache.get(self.address)
         if not status_balance:
             balance = get_address_balance('btc', self.address)
-            cache.set(self.address, ['OK', price * balance])
+            cache.set(self.address, ['OK', balance])
         else:
             status, balance = status_balance
 
